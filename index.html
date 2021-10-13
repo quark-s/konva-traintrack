@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Konva</title>
+        <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+        <script src="node_modules/konva/konva.min.js"></script>
+        <script src="node_modules/lodash/lodash.min.js"></script>
+        <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="node_modules/bootstrap-icons/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        
+        <div id="info"><div>selected type: <span id="infoSel">none</span></div></div>
+
+        <div id="menu" class="header menu">
+            <div id="buttons">
+                <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>            
+                <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+        </div>
+        <div id="container"></div>
+        
+    </body>
+    <script src="tracks.js"></script>
+    <script src="stage.js"></script>
+</html>
