@@ -7,13 +7,15 @@ var stage = new Konva.Stage({
   
 // then create layer
 var layer = new Konva.Layer();
+var gridLayer = new Konva.Layer();
 
 let trackMap = new Map();
 let connectorMap = new Map();
 let selectedTrack = null;
 
 let config = {
-    snapMaxRot: 20
+    snapMaxRot: 20,
+    unitSize: 25        //pixels per grid unit
 }
 
 var tr = new Konva.Transformer();
@@ -71,50 +73,50 @@ let trackData = [
     {
         type: "TrackCrossType1",
         pos: {x:450, y:550},
-        width: 50,
-        height: 250
+        width: 2,
+        height: 10
     },
     {
         type: "TrackJunctionType1",
         pos: {x:500, y:300},
-        width: 50,
-        height: 250
+        width: 2,
+        height: 10
     },
     {
         type: "TrackJunctionType2",
         pos: {x:300, y:50},
-        width: 50,
-        height: 250
+        width: 2,
+        height: 10
     },
     {
         type: "TrackType1",
         pos: {x:50, y:450},
-        width: 50,
-        height: 250
+        width: 2,
+        height: 10
     },
     {
         type: "TrackType1",
         pos: {x:150, y:450},
-        width: 50,
-        height: 100
+        width: 2,
+        height: 4
     },
     {
         type: "TrackType1",
         pos: {x:150, y:50},
-        width: 50,
-        height: 100
+        width: 2,
+        height: 4
     },
     {
         type: "TrackType2",
         pos: {x:100, y:50},
-        width: 50,
-        height: 150
+        width: 2,
+        height: 6
     },
     {
         type: "TrackType2",
         pos: {x:100, y:50},
-        width: 50,
-        height: 150
+        width: 2,
+        height: 6
     },
 ]
 
@@ -166,7 +168,8 @@ function deselectAllTracks(_layer){
 
 trackData.forEach( (d) => {
     try {
-        let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${d.width}, ${d.height})`);
+        let factor = config.unitSize;
+        let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*d.width}, ${factor*d.height})`);
         // let tmp = new window[d.type](d.pos, d.width, d.height);
         tmp.onSelect = cbTrackSelected;
         trackMap.set(tmp.id, tmp);
@@ -182,51 +185,43 @@ trackData.forEach( (d) => {
 });
 
 
-let twidth = 100;
-let theight = 400;
+let nLinesV = Math.floor(stage.width() / config.unitSize);
+let nLinesH = Math.floor(stage.height() / config.unitSize);
 
-let tmp = new Konva.Shape({
-    sceneFunc: function(context) {
-        context.beginPath();
-        context.moveTo(0, 0);
-        context.lineTo(0, -theight);
-        context.lineTo(twidth, -theight);
-        context.lineTo(twidth, -(5*theight/9));
-        context.quadraticCurveTo(
-            twidth+twidth/2,
-            -(3*theight/4), 
-            twidth+twidth/2, 
-            -theight
-        );
-        context.lineTo(2*twidth+twidth/2, -theight);
-        context.quadraticCurveTo(
-            2*twidth+twidth/2,
-            -(theight/2),
-            twidth,
-            -(theight/9)
-        );
-        context.lineTo(twidth, 0);
-        context.lineTo(0, 0);
-        context.closePath();
-        context.fillStrokeShape(this);
-    },
-    fill: "#eee",
-    stroke: "red",
-    strokeWidth: 2
-});
+for(let i=0; i<nLinesV; i++){
+    let x0 = (i)*config.unitSize;
+    var line = new Konva.Line({
+        x: x0,
+        y: 0,
+        points: [0, 0, 0, stage.height()],
+        stroke: '#aaa',
+        strokeWidth: 1,
+        // tension: 1,
+        dash: [2,2]
+      });
+      gridLayer.add(line);
+}
 
-let test = new Konva.Group({
-    x: 200,
-    y: 500,           
-});
-
-test.add(tmp);
+for(let i=0; i<nLinesH; i++){
+    let y0 = (i)*config.unitSize;
+    var line = new Konva.Line({
+        x: 0,
+        y: y0,
+        points: [0, 0, stage.width(), 0],
+        stroke: '#aaa',
+        strokeWidth: 1,
+        tension: 1,
+        dash: [2,2]
+      });
+      gridLayer.add(line);
+}
 
 // layer.add(tr);
 // layer.add(test);
 // console.log(nodeMap.values());
 
 // add the layer to the stage
+stage.add(gridLayer);
 stage.add(layer);
 
 // draw the image
@@ -280,7 +275,7 @@ layer.on('dragmove', function (e) {
                 if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                     let rot1 = c1.shape.getAbsoluteRotation();
                     let rot2 = c2.shape.getAbsoluteRotation();
-                    console.log(rot1, rot2);
+                    // console.log(rot1, rot2);
                     if(Math.abs(rot1-rot2)<=config.snapMaxRot){
                         alignTracks(c1,c2);
                     }                  

@@ -408,11 +408,11 @@ class TrackJunctionType1{
         let theight = this._cHeight;
 
         this._connector2 = new Connector({x:0, y: this._options.strokeWidth/2}, this._cWidth, -this._cWidth/3, false, this);
-        this._connector1 = new Connector({x:0, y: 3*twidth+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
+        this._connector1 = new Connector({x:0, y: 4*twidth+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
 
-        this._connector3 = new Connector({x:3*twidth+twidth/2 - this._options.strokeWidth/2, y: 3*twidth+twidth/2}, twidth, -twidth/3, true, this);
+        this._connector3 = new Connector({x:3*twidth - this._options.strokeWidth/2, y: 4*twidth}, twidth, twidth/3, true, this);
         this._connector3.shape.rotation(-90);
-        this._connector3.shape.scaleY(-this._connector3.shape.scaleY());
+        // this._connector3.shape.scaleY(-this._connector3.shape.scaleY());
         this._connector3.shape.move({x: this._options.strokeWidth});
 
         this._track = new Konva.Shape({
@@ -422,20 +422,20 @@ class TrackJunctionType1{
                 context.lineTo(twidth, 0);
                 context.quadraticCurveTo(
                     twidth,
-                    2*twidth+twidth/2, 
-                    3*twidth+twidth/2, 
-                    2*twidth+twidth/2
+                    3*twidth, 
+                    3*twidth, 
+                    3*twidth
                 );
-                context.lineTo(3*twidth+twidth/2, 3*twidth+twidth/2);
+                context.lineTo(3*twidth, 4*twidth);
                 context.quadraticCurveTo(
                     //twidth,
-                    twidth+twidth/4, 
-                    3*twidth+twidth/2, 
+                    1.5*twidth, 
+                    4*twidth, 
                     twidth, 
-                    2*twidth+twidth/2
+                    3*twidth
                 );
-                context.lineTo(twidth, 3*twidth);
-                context.lineTo(0, 3*twidth);
+                context.lineTo(twidth, 4*twidth);
+                context.lineTo(0, 4*twidth);
                 context.lineTo(0, 0);
                 context.closePath();
                 context.fillStrokeShape(this);
@@ -532,8 +532,8 @@ class TrackJunctionType2{
             strokeWidth: 2,
             name: 'TrackJunctionType2'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
+        this._cWidth = !isNaN(cWidth) ? cWidth : 100;
+        this._cHeight = !isNaN(cHeight) ? cHeight : 300;
         this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
@@ -553,7 +553,7 @@ class TrackJunctionType2{
 
         this._connector1 = new Connector({x:0, y: theight+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
         this._connector2 = new Connector({x:0, y: this._options.strokeWidth/2}, this._cWidth, -this._cWidth/3, false, this);
-        this._connector3 = new Connector({x:twidth+twidth/2, y: theight+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
+        this._connector3 = new Connector({x:2*twidth, y: theight+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
 
         // this._connector2.shape.rotation(90);
         // this._connector2.shape.y(this._connector2.shape.y()-this._cWidth);
@@ -564,19 +564,22 @@ class TrackJunctionType2{
                 context.moveTo(0, 0);
                 context.lineTo(0, theight);
                 context.lineTo(twidth, theight);
-                context.lineTo(twidth, (5*theight/9));
+                context.lineTo(twidth, 3.5*twidth);
+                // context.lineTo(2*twidth, theight);
                 context.quadraticCurveTo(
-                    twidth+twidth/2,
-                    (3*theight/4), 
-                    twidth+twidth/2, 
+                    2*twidth,
+                    3.5*twidth,
+                    2*twidth, 
                     theight
                 );
-                context.lineTo(2*twidth+twidth/2, theight);
-                context.quadraticCurveTo(
-                    2*twidth+twidth/2,
-                    (theight/2),
+                context.lineTo(3*twidth, theight);
+                context.bezierCurveTo(
+                    3*twidth,
+                    3*twidth,
+                    1*twidth,
+                    2*twidth,
                     twidth,
-                    2*(theight/9)
+                    twidth
                 );
                 context.lineTo(twidth, 0);
                 context.lineTo(0, 0);
