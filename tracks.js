@@ -99,6 +99,18 @@ class Connector{
         }
     }    
 
+    flipY(){
+        this._group.getChildren().forEach((c)=> {
+            c.scaleY(-c.scaleY());
+        });
+    }
+
+    flipX(){
+        this._group.getChildren().forEach((c)=> {
+            c.scaleX(-c.scaleX());
+        });
+    }
+
     get selected(){
         return this._isSelected;
     }
@@ -133,7 +145,7 @@ class Connector{
     }    
 
     get inverse(){
-        this._inverse
+        return this._inverse;
     }
 }
 
@@ -145,7 +157,7 @@ class TrackType1{
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
-            name: 'trackType1'
+            name: 'TrackType1'
         };
         this._cWidth = !isNaN(cWidth) ? cWidth : 150;
         this._cHeight = !isNaN(cHeight) ? cHeight : 500;
@@ -252,11 +264,11 @@ class TrackType2{
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
-            name: 'trackType2'
+            name: 'TrackType2'
         };
         this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
-        this._innerRadius = this._cHeight - this._cWidth;
+        this._cHeight = !isNaN(cHeight) ? Math.abs(cHeight) : 500;
+        this._innerRadius = this._cHeight - Math.abs(this._cWidth);
         this._outerRadius = this._cHeight;
         this._angle = 90;
         this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
@@ -272,11 +284,25 @@ class TrackType2{
     
     init(){
 
-        this._connector1 = new Connector({x:this._cHeight - this._cWidth, y: this._options.strokeWidth/2}, this._cWidth, -this._cWidth/3, false, this);
+        let theight = this._cHeight;
+        let twidth = this._cWidth;
 
-        this._connector2 = new Connector({x:-this._options.strokeWidth/2, y: this._cHeight}, this._cWidth, this._cWidth/3, true, this);
-        this._connector2.shape.rotation(90);
-        this._connector2.shape.y(this._connector2.shape.y()-this._cWidth);
+        if(twidth<0){
+            twidth = Math.abs(twidth);
+            this._connector1 = new Connector({x:theight, y: -this._options.strokeWidth/2}, twidth, twidth/3, true, this);
+            this._connector1.shape.rotate(-180);
+
+            this._connector2 = new Connector({x:this._options.strokeWidth/2, y: theight}, twidth, -twidth/3, false, this);
+            this._connector2.shape.rotation(-90);
+        }
+        else{
+            this._connector1 = new Connector({x:theight - twidth, y: this._options.strokeWidth/2}, twidth, -twidth/3, false, this);
+
+            this._connector2 = new Connector({x:-this._options.strokeWidth/2, y: theight-twidth}, twidth, twidth/3, true, this);
+            this._connector2.shape.rotation(90);
+            // this._connector2.flipX();
+            // this._connector2.shape.scaleX(-this._connector2.shape.scaleX());
+        }
 
         this._track = new Konva.Arc({
             x: 0,
@@ -377,6 +403,144 @@ class TrackType2{
 }
 
 
+
+class TrackType3{
+
+    constructor(pos, cWidth, cHeight){
+        this._options = {
+            fill: '#EEE',
+            stroke: 'black',
+            strokeWidth: 2,
+            name: 'TrackType3'
+        };
+        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
+        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
+        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
+        this._connector1 = null;
+        this._connector2 = null;
+        this._track = null;
+        this._group = null;
+        this._isSelected = false;
+        this._onSelect = null;
+        this._id = createUUID();
+        this.init();
+    }
+    
+    init(){
+
+        let twidth = this._cWidth;
+        let theight = this._cHeight;
+
+        if(twidth<0){
+            this._connector1 = new Connector({x:twidth, y: this._options.strokeWidth/2}, Math.abs(this._cWidth), this._cWidth/3, false, this);
+            this._connector2 = new Connector({x:twidth+1.5*twidth, y: theight+this._options.strokeWidth/2}, Math.abs(this._cWidth), -this._cWidth/3, true, this);
+        }else
+        {        
+            this._connector1 = new Connector({x:0, y: this._options.strokeWidth/2}, this._cWidth, -this._cWidth/3, false, this);
+            this._connector2 = new Connector({x:twidth+0.5*twidth, y: theight+this._options.strokeWidth/2}, this._cWidth, this._cWidth/3, true, this);
+        }
+        this._track = new Konva.Shape({
+            sceneFunc: function(context) {
+                context.beginPath();
+                context.moveTo(0, 0);
+                context.bezierCurveTo(
+                    0,
+                    0.5*theight, 
+                    twidth+0.5*twidth,
+                    0.5*theight, 
+                    twidth+0.5*twidth, 
+                    theight
+                );
+                context.lineTo(2.5*twidth, theight);
+                context.bezierCurveTo(
+                    2.5*twidth,
+                    0.5*theight, 
+                    twidth,
+                    0.5*theight, 
+                    twidth, 
+                    0
+                );                
+                context.closePath();
+                context.fillStrokeShape(this);
+            },
+            fill: this._options.fill,
+            stroke: this._options.stroke,
+            strokeWidth: this._options.strokeWidth,
+            name: this._options.name + '_body',
+            id: createUUID(),
+        });        
+
+        this._group = new Konva.Group({
+            draggable: true,
+            name: this._options.name,
+            x: this._pos.x,
+            y: this._pos.y,
+            // width: this._cWidth,
+            // height: this._cHeight,
+            id: this.id
+        });
+
+        this._group.on('mouseover', function () {
+            document.body.style.cursor = 'pointer';
+        });
+        this._group.on('mouseout', function () {
+            document.body.style.cursor = 'default';
+        });
+
+        // this._group.on('dblclick dbltap', (e) => {
+        this._group.on('click tap', (e) => {
+            if(typeof this._onSelect == "function")
+                this._onSelect(this);
+        })        
+
+        // this._group.add(this._boundingBox);
+        this._group .add( this._track, this._connector1.shape, this._connector2.shape);
+    }
+
+    select(p){       
+        if(typeof p == "undefined")
+            p = true; 
+        if(!!p && !this._isSelected){
+            this._track.stroke("green");
+            this.connectors.forEach((c) => c.select(1));
+            this._isSelected = true;
+        }
+        else if (this._isSelected){
+            this._track.stroke(this._options.stroke);
+            this.connectors.forEach((c) => c.select(0));
+            this._isSelected = false;
+        }
+    }
+
+    addToLayer(layer){
+        layer.add(this._group);
+    }
+
+    get selected(){
+        return this._isSelected;
+    }
+
+    get shape(){
+        return this._group;
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get connectors(){
+        return [this._connector1, this._connector2];
+    }
+
+    get onSelect(){
+        return this._onSelect;
+    }
+
+    set onSelect(callback){
+        if(typeof callback == "function")
+            this._onSelect = callback;
+    }    
+}
 
 
 class TrackJunctionType1{

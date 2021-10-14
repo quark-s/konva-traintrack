@@ -57,14 +57,14 @@ function alignTracks(c1, c2){
     trackShape.rotation(trackShape.rotation()-rotDiff);
     c1.connectedTrack = c2.parentTrack;
     c2.connectedTrack = c1.parentTrack;
-    console.log("align");
+    // console.log("align");
     return true;
 }
 
 function unplugTracks(c1, c2){
     if(!(c1 instanceof Connector) || !(c2 instanceof Connector))
         return false;
-    console.log("unplug");
+    // console.log("unplug");
     c1.connectedTrack = null;
     c2.connectedTrack = null;    
 }
@@ -102,7 +102,7 @@ let trackData = [
     },
     {
         type: "TrackType1",
-        pos: {x:150, y:50},
+        pos: {x:150, y:300},
         width: 2,
         height: 4
     },
@@ -114,12 +114,35 @@ let trackData = [
     },
     {
         type: "TrackType2",
-        pos: {x:100, y:50},
+        pos: {x:150, y:100},
         width: 2,
         height: 6
     },
+    {
+        type: "TrackType2",
+        pos: {x:290, y:420},
+        width: -2,
+        height: 6
+    },
+    {
+        type: "TrackType2",
+        pos: {x:240, y:360},
+        width: -2,
+        height: 6
+    },
+    {
+        type: "TrackType3",
+        pos: {x:500, y:50},
+        width: -2,
+        height: 10
+    },
+    {
+        type: "TrackType3",
+        pos: {x:550, y:50},
+        width: 2,
+        height: 10
+    },
 ]
-
 
 function updateInfo(track){
     let info = document.getElementById("info");
@@ -127,6 +150,7 @@ function updateInfo(track){
         let type = track.shape.name();
         let id = track.shape.id();
         let rot = track.shape.getAbsoluteRotation();
+        let pos = track.shape.x() + ", " + track.shape.y();
         let tmp = "";
         track.connectors.forEach((c,i) => {
             let shape = c?.connectedTrack ? c.connectedTrack.shape.id() : "none";
@@ -134,16 +158,17 @@ function updateInfo(track){
         });
         info.innerHTML = `
         <div>id: ${id}</div>
-        <div>selected type: ${type}</div>
-        <div>current rotation: ${rot}</div>
+        <div>type: ${type}</div>
+        <div>pos: ${pos}</div>
+        <div>rotation: ${rot}</div>
         <br/>
         <div>connectors: ${tmp}</div>
         `
     }
-    else info.innerHTML = "";
-    // else info.innerHTML = `
-    // <div>selected type: <span id="infoSel">none</span></div>
-    // `;
+    // else info.innerHTML = "";
+    else info.innerHTML = `
+    <div>nothing selected</div>
+    `;
 }
 
 function cbTrackSelected(track){
@@ -241,7 +266,7 @@ layer.on('dragend', function (e) {
     if(target.getType() !== "Group")
         return;
     
-    console.log(target);
+    // console.log(target);
     let track = trackMap.get(target.id());
     if(!track)
         return;
@@ -252,6 +277,7 @@ layer.on('dragend', function (e) {
                 if(!!c2.connectedTrack && c2.connectedTrack == track){
                     if(!Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                         unplugTracks(c1, c2);
+                        updateInfo(track);
                     }
                 }
             })
@@ -263,19 +289,21 @@ layer.on('dragmove', function (e) {
     var target = e.target;
     if(target.getType() !== "Group")
         return;
-        
+    
+    if(!trackMap.has(target.id()))
+        return;
+    
     target.find(".connector_f, .connector_m").forEach(c => {
         let c1 = connectorMap.get(c.id());
         if(!c1)
             return;
 
-        let _inverse = c.getName() == "connector_f" ? false: true;
         connectorMap.forEach(c2 => {
-            if(c1 != c2 && c2.parentTrack != c1.parentTrack && c2.inverse != _inverse){
+            if(c1 != c2 && c2.parentTrack != c1.parentTrack && c2.inverse == !c1.inverse){
                 if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                     let rot1 = c1.shape.getAbsoluteRotation();
                     let rot2 = c2.shape.getAbsoluteRotation();
-                    // console.log(rot1, rot2);
+                    console.log(rot1, rot2);
                     if(Math.abs(rot1-rot2)<=config.snapMaxRot){
                         alignTracks(c1,c2);
                     }                  
@@ -283,6 +311,9 @@ layer.on('dragmove', function (e) {
             }
         });
     });
+
+    updateInfo(trackMap.get(target.id()));
+
   });
 
 
