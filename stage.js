@@ -304,10 +304,13 @@ layer.on('dragmove', function (e) {
                     let rot1 = c1.shape.getAbsoluteRotation();
                     let rot2 = c2.shape.getAbsoluteRotation();
                     console.log(rot1, rot2);
-                    if(Math.abs(rot1-rot2)<=config.snapMaxRot){
-                        alignTracks(c1,c2);
-                    }                  
-                }                
+                    if(
+                        Math.abs(rot1-rot2) <= config.snapMaxRot 
+                        || (180 - Math.abs(rot1) <= config.snapMaxRot && 180 - Math.abs(rot2) <= config.snapMaxRot )
+                        ){
+                            alignTracks(c1,c2);
+                        }                  
+                }
             }
         });
     });
