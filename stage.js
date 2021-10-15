@@ -320,21 +320,25 @@ layer.on('dragmove', function (e) {
 
 (function() {
 
-    function rotate(dir){
+    function rotate(dir, button){
+        button.setAttribute("disabled", 1);
         let rot = !!dir ? 45 : -45;
         if(!!selectedTrack){
             var tween = new Konva.Tween({
                 node: selectedTrack.shape,
                 duration: .5,
                 rotation: selectedTrack.shape.getAbsoluteRotation() + rot,
-                onFinish: () => updateInfo(selectedTrack)
+                onFinish: () => { 
+                    button.removeAttribute("disabled"); 
+                    updateInfo(selectedTrack);
+                }
               });
               tween.play();
               // selectedTrack.shape.rotate(45);
         }
     }
 
-    document.getElementById("bRotateRight").onclick = (e) => rotate(1);
-    document.getElementById("bRotateLeft").onclick = (e) => rotate(0);
+    document.getElementById("bRotateRight").onclick = function(e) {rotate(1,this);}
+    document.getElementById("bRotateLeft").onclick = function(e) {rotate(0,this);}
 
  })();
