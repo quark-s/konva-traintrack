@@ -18,61 +18,6 @@ let config = {
     unitSize: 25        //pixels per grid unit
 }
 
-var tr = new Konva.Transformer();
-tr.rotationSnaps([0, 45, 90, 135, 180, 225, 270, 315]);
-tr.rotationSnapTolerance(40);
-tr.resizeEnabled(false);
-tr.anchorSize(20);
-
-
-function createUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-       return v.toString(16);
-    });
- }
-
-
-function haveIntersection(r1, r2) {
-    return !(
-      r2.x > r1.x + r1.width ||
-      r2.x + r2.width < r1.x ||
-      r2.y > r1.y + r1.height ||
-      r2.y + r2.height < r1.y
-    );
-}
-
-function alignTracks(c1, c2){
-    if(!(c1 instanceof Connector) || !(c2 instanceof Connector))
-        return false;
-    
-    let rotDiff = c1.shape.getAbsoluteRotation() - c2.shape.getAbsoluteRotation();
-    let pos1 = c1.shape.absolutePosition();
-    let pos2 = c2.shape.absolutePosition();
-    xDiff = pos1.x - pos2.x;
-    yDiff = pos1.y - pos2.y;
-    let trackShape = c1.parentTrack.shape;
-    trackShape.x(trackShape.x()-xDiff);
-    trackShape.y(trackShape.y()-yDiff);
-    trackShape.rotation(trackShape.rotation()-rotDiff);
-    c1.connectedTrack = c2.parentTrack;
-    c2.connectedTrack = c1.parentTrack;
-    if(!c1.inverse)
-        c1.parentTrack.shape.moveToTop();
-    else
-        c2.parentTrack.shape.moveToTop();
-    // console.log("align");
-    return true;
-}
-
-function unplugTracks(c1, c2){
-    if(!(c1 instanceof Connector) || !(c2 instanceof Connector))
-        return false;
-    // console.log("unplug");
-    c1.connectedTrack = null;
-    c2.connectedTrack = null;    
-}
-
 let trackData = [
     {
         type: "TrackCrossType1",
@@ -148,8 +93,74 @@ let trackData = [
     },
 ]
 
+var tr = new Konva.Transformer();
+tr.rotationSnaps([0, 45, 90, 135, 180, 225, 270, 315]);
+tr.rotationSnapTolerance(40);
+tr.resizeEnabled(false);
+tr.anchorSize(20);
+
+
+function createUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+       return v.toString(16);
+    });
+ }
+
+
+function haveIntersection(r1, r2) {
+    return !(
+      r2.x > r1.x + r1.width ||
+      r2.x + r2.width < r1.x ||
+      r2.y > r1.y + r1.height ||
+      r2.y + r2.height < r1.y
+    );
+}
+
+function alignTracks(c1, c2){
+    if(!(c1 instanceof Connector) || !(c2 instanceof Connector))
+        return false;
+    
+    let rotDiff = c1.shape.getAbsoluteRotation() - c2.shape.getAbsoluteRotation();
+    let pos1 = c1.shape.absolutePosition();
+    let pos2 = c2.shape.absolutePosition();
+    xDiff = pos1.x - pos2.x;
+    yDiff = pos1.y - pos2.y;
+    let trackShape = c1.parentTrack.shape;
+    trackShape.x(trackShape.x()-xDiff);
+    trackShape.y(trackShape.y()-yDiff);
+    trackShape.rotation(trackShape.rotation()-rotDiff);
+    c1.connectedTrack = c2.parentTrack;
+    c2.connectedTrack = c1.parentTrack;
+    if(!c1.inverse)
+        c1.parentTrack.shape.moveToTop();
+    else
+        c2.parentTrack.shape.moveToTop();
+    // console.log("align");
+    return true;
+}
+
+function unplugTracks(c1, c2){
+    if(!(c1 instanceof Connector) || !(c2 instanceof Connector))
+        return false;
+    // console.log("unplug");
+    c1.connectedTrack = null;
+    c2.connectedTrack = null;    
+}
+
+let trackTypes = [
+    "TrackType1",
+    "TrackType2",
+    "TrackType3",
+    "TrackCrossType1",
+    "TrackJunctionType1",
+    "TrackJunctionType2"
+]
+
+
 function updateInfo(track){
     let info = document.getElementById("info");
+    track = !!track ? track : selectedTrack;
     if(!!track){
         let type = track.shape.name();
         let id = track.shape.id();
@@ -195,7 +206,7 @@ function deselectAllTracks(_layer){
     updateInfo(null);
 }
 
-trackData.forEach( (d) => {
+function addTrack(d){    
     try {
         let factor = config.unitSize;
         let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*d.width}, ${factor*d.height})`);
@@ -210,9 +221,31 @@ trackData.forEach( (d) => {
     
     } catch (error) {
         console.log(error)
+    }   
+}
+
+function deleteTrack(_layer, _id){
+    let track = trackMap.get(_id);
+    if(!track)
+        return false;
+
+    let node = _layer.findOne("#"+_id);
+    if(!!node){
+        node.destroy();
+        deselectAllTracks(_layer);
+        return trackMap.delete(_id);        
     }
+    return false;
+}
+
+trackData.forEach( (d) => {
+    addTrack(d);
 });
 
+
+
+
+/****** grid ********/
 
 let nLinesV = Math.floor(stage.width() / config.unitSize);
 let nLinesH = Math.floor(stage.height() / config.unitSize);
@@ -244,6 +277,9 @@ for(let i=0; i<nLinesH; i++){
       });
       gridLayer.add(line);
 }
+
+
+
 
 // layer.add(tr);
 // layer.add(test);
@@ -307,7 +343,7 @@ layer.on('dragmove', function (e) {
                 if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                     let rot1 = c1.shape.getAbsoluteRotation();
                     let rot2 = c2.shape.getAbsoluteRotation();
-                    console.log(rot1, rot2);
+                    // console.log(rot1, rot2);
                     if(
                         Math.abs(rot1-rot2) <= config.snapMaxRot 
                         || (180 - Math.abs(rot1) <= config.snapMaxRot && 180 - Math.abs(rot2) <= config.snapMaxRot )
@@ -328,9 +364,9 @@ layer.on('dragmove', function (e) {
 (function() {
 
     function rotate(dir, button){
-        button.setAttribute("disabled", 1);
         let rot = !!dir ? 45 : -45;
         if(!!selectedTrack){
+            button.setAttribute("disabled", 1);
             var tween = new Konva.Tween({
                 node: selectedTrack.shape,
                 duration: .5,
@@ -347,5 +383,34 @@ layer.on('dragmove', function (e) {
 
     document.getElementById("bRotateRight").onclick = function(e) {rotate(1,this);}
     document.getElementById("bRotateLeft").onclick = function(e) {rotate(0,this);}
+    document.getElementById("bDelete").onclick = function(e) {if(!!selectedTrack) deleteTrack(layer, selectedTrack.id);}
+
+
+
+    let trackSel = document.getElementById("addTrackType");
+    trackTypes.forEach(t => {
+        var option = document.createElement("option");
+        option.value = t;
+        option.text = t;
+        trackSel.appendChild(option);
+    });
+
+    document.getElementById("bAddTrack").onclick = function(e) {
+        var button = this;
+        button.setAttribute("disabled", 1);
+        addTrack(
+            {           
+                type: document.getElementById("addTrackType").value || "TrackType1",
+                pos: {x:50, y:50},
+                width: parseInt(document.getElementById("addTrackWidth").value) || 2,
+                height: parseInt(document.getElementById("addTrackHeight").value) || 6  
+            }         
+        );
+        window.setTimeout(e => {
+            button.removeAttribute("disabled");
+        }, 1000);
+    };
+
+
 
  })();

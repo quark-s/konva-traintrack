@@ -15,9 +15,33 @@
         <div id="info">nothing selected</div>
 
         <div id="menu" class="header menu">
-            <div id="buttons">
-                <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>            
-                <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-3">
+                            <div id="rotate">
+                                <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>
+                                <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                <button  class="btn btn-danger" id="bDelete"><i class="bi bi-trash"></i></button>
+                            </div>
+                    </div>
+                    <div class="col-sm-3">
+                            <div id="create">
+
+                                <select id="addTrackType"></select><br/>
+                                
+                                <!-- <input class="create-scale" id="selHeight" maxlength="3" type="text"> -->
+                                <div id="create-scale" class="input-group input-group-sm mb-3">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text" id="label-width">W/H</span>
+                                    </div>
+                                    <input class="form-control" value="2" aria-label="width" aria-describedby="label-width" id="addTrackWidth" maxlength="1" type="text">
+                                    <input class="form-control" value="6" aria-label="height" aria-describedby="label-width" id="addTrackHeight" maxlength="1" type="text">
+                                    <button class="btn btn-primary" id="bAddTrack">add</button>
+                                </div>                                          
+                
+                            </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="container"></div>

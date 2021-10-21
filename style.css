@@ -1,17 +1,42 @@
 #menu {
-    padding: 10px;
-    height: 70px;
-}
+    padding: 10px 0 0 0;
+    /* height: 85px; */
+} 
 
-#menu button{
+#menu #rotate button{
     height: 64px;
     width: 64px
 }
 
-#menu #buttons{
-    float: left;
-    height: 70px;
+#menu #rotate button i.bi{
+    font-size: 32px;
 }
+
+
+/* 
+#menu #rotate{
+    float: left;
+    height: 85px;
+    padding: 0 20px 0 10px;
+}
+
+#menu #create{
+    float: left;
+    height: 85px;
+    width: 200px;
+}
+ */
+
+
+#create-scale {
+    width: 162px;
+    padding-top: 5px;
+}
+
+#create-scale .input-group-text{
+    font-size: .75rem;
+}
+
 
 #info{
     font-size: small;
@@ -27,6 +52,3 @@
     opacity: .5;
 }
 
-#menu button i.bi{
-    font-size: 32px;
-}
