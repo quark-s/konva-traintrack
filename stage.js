@@ -12,6 +12,7 @@ var gridLayer = new Konva.Layer();
 let trackMap = new Map();
 let connectorMap = new Map();
 let selectedTrack = null;
+let savedStageData = [];
 
 let config = {
     snapMaxRot: 20,
@@ -25,18 +26,18 @@ let trackData = [
         width: 2,
         height: 10
     },
-    {
-        type: "TrackJunctionType1",
-        pos: {x:500, y:300},
-        width: 2,
-        height: 10
-    },
-    {
-        type: "TrackJunctionType2",
-        pos: {x:300, y:50},
-        width: 2,
-        height: 10
-    },
+    // {
+    //     type: "TrackJunctionType1",
+    //     pos: {x:500, y:300},
+    //     width: 2,
+    //     height: 10
+    // },
+    // {
+    //     type: "TrackJunctionType2",
+    //     pos: {x:300, y:50},
+    //     width: 2,
+    //     height: 10
+    // },
     {
         type: "TrackType1",
         pos: {x:50, y:450},
@@ -209,7 +210,7 @@ function deselectAllTracks(_layer){
 function addTrack(d){    
     try {
         let factor = config.unitSize;
-        let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*d.width}, ${factor*d.height})`);
+        let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
         // let tmp = new window[d.type](d.pos, d.width, d.height);
         tmp.onSelect = cbTrackSelected;
         trackMap.set(tmp.id, tmp);
@@ -224,18 +225,13 @@ function addTrack(d){
     }   
 }
 
-function deleteTrack(_layer, _id){
-    let track = trackMap.get(_id);
-    if(!track)
+function removeTrack(_layer, _track){
+    if(!_track)
         return false;
 
-    let node = _layer.findOne("#"+_id);
-    if(!!node){
-        node.destroy();
-        deselectAllTracks(_layer);
-        return trackMap.delete(_id);        
-    }
-    return false;
+    _track.removeFromLayer();
+    deselectAllTracks(_layer);
+    return trackMap.delete(_track.id);        
 }
 
 trackData.forEach( (d) => {
@@ -366,13 +362,15 @@ layer.on('dragmove', function (e) {
     function rotate(dir, button){
         let rot = !!dir ? 45 : -45;
         if(!!selectedTrack){
+            let _rotation = selectedTrack.shape.getAbsoluteRotation() + rot;
             button.setAttribute("disabled", 1);
             var tween = new Konva.Tween({
                 node: selectedTrack.shape,
                 duration: .5,
-                rotation: selectedTrack.shape.getAbsoluteRotation() + rot,
+                rotation: _rotation,
                 onFinish: () => { 
-                    button.removeAttribute("disabled"); 
+                    button.removeAttribute("disabled");
+                    selectedTrack.rotation = _rotation;
                     updateInfo(selectedTrack);
                 }
               });
@@ -383,7 +381,29 @@ layer.on('dragmove', function (e) {
 
     document.getElementById("bRotateRight").onclick = function(e) {rotate(1,this);}
     document.getElementById("bRotateLeft").onclick = function(e) {rotate(0,this);}
-    document.getElementById("bDelete").onclick = function(e) {if(!!selectedTrack) deleteTrack(layer, selectedTrack.id);}
+    document.getElementById("bDelete").onclick = function(e) {if(!!selectedTrack) removeTrack(layer, selectedTrack);}
+
+    document.getElementById("bSaveStage").onclick = function(e) {
+        savedStageData = [];
+        trackMap.forEach(element => {
+            let data = element.data;
+            data.width = Math.floor(data.width/config.unitSize);
+            data.height = Math.floor(data.height/config.unitSize);
+            savedStageData.push(data);
+        });
+        console.log(savedStageData);
+    }
+
+    document.getElementById("bRestoreStage").onclick = function(e) {
+        if(savedStageData.length==0)
+            return;
+        trackMap.forEach(element => {
+            removeTrack(layer, element);
+        });            
+        savedStageData.forEach(element => {
+            addTrack(element);
+        });
+    }
 
 
 

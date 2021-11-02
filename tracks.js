@@ -149,26 +149,125 @@ class Connector{
     }
 }
 
+//abstract class Track
+class Track{
 
-class TrackType1{
+    constructor(pos, cWidth, cHeight, cRot){
+        this._options = {
+            fill: '#EEE',
+            stroke: 'black',
+            strokeWidth: 2,
+            name: 'Track'
+        };        
+        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
+        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
+        this._cRot = (!isNaN(cRot) && cRot <= 180 && cRot >= -180) ? cRot : 0;
+        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
+        this._group = null;
+        this._isSelected = false;
+        this._onSelect = null;
+        this._id = createUUID();
+    }
 
-    constructor(pos, cWidth, cHeight){
+    init() {
+        this._group = new Konva.Group({
+            draggable: true,
+            name: this._options.name,
+            x: this._pos.x,
+            y: this._pos.y,
+            width: this._cWidth,
+            height: this._cHeight,
+            id: this.id
+        });
+        this._group .add( this._track, this._connector1.shape, this._connector2.shape);
+        this._group .on('mouseover', function () {
+            document.body.style.cursor = 'pointer';
+        });
+        this._group .on('mouseout', function () {
+            document.body.style.cursor = 'default';
+        });
+        this._group.on('click tap', (e) => {
+            if(typeof this._onSelect == "function")
+                this._onSelect(this);
+        });        
+    }
+
+    addToLayer(layer){
+        layer.add(this._group);
+    }
+
+    removeFromLayer(){
+        this._group.remove();
+    }
+
+    get selected(){
+        return this._isSelected;
+    }
+
+    get rotation(){
+        return this._cRot;
+    }
+
+    set rotation(rot){
+        if(isNaN(rot) || rot > 180 || rot < -180)
+            return;
+        
+        this._cRot = rot;
+
+        if(this.shape.getAbsoluteRotation() != rot)
+            this.shape.rotation(rot);
+    }
+
+    get shape(){
+        return this._group;
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get data(){
+        return {
+            // pos:{
+            //     x: this._group.x(),
+            //     y: this._group.y()
+            // },
+            type: this._options.name,
+            pos: this._group.absolutePosition(),
+            width: this._cWidth,
+            height: this._cHeight,
+            rotation: this._group.getAbsoluteRotation(),
+            actualWidth: this._group.width(),
+            actualHeight: this._group.height(),
+            initialPos: this._pos,
+            initialRotation: this._cRot
+
+        }
+    }
+
+    get onSelect(){
+        return this._onSelect;
+    }
+
+    set onSelect(callback){
+        if(typeof callback == "function")
+            this._onSelect = callback;
+    }
+}
+
+class TrackType1 extends Track{
+
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackType1'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();        
     }
     
@@ -196,7 +295,8 @@ class TrackType1{
             height: this._cHeight,
             id: this.id
         });
-        this._group .add( this._track, this._connector1.shape, this._connector2.shape);
+        this._group .add( this._track, this._connector1.shape, this._connector2.shape);    
+
         this._group .on('mouseover', function () {
             document.body.style.cursor = 'pointer';
         });
@@ -209,6 +309,7 @@ class TrackType1{
             if(typeof this._onSelect == "function")
                 this._onSelect(this);
         });
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -226,59 +327,28 @@ class TrackType1{
         }
     }
 
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
     get connectors(){
         return [this._connector1, this._connector2];
-    }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
     }
 }
 
 
-class TrackType2{
+class TrackType2 extends Track{
 
-    constructor(pos, cWidth, cHeight){
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackType2'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? Math.abs(cHeight) : 500;
         this._innerRadius = this._cHeight - Math.abs(this._cWidth);
         this._outerRadius = this._cHeight;
         this._angle = 90;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();
     }
     
@@ -355,6 +425,7 @@ class TrackType2{
 
         // this._group.add(this._boundingBox);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape);
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -371,58 +442,27 @@ class TrackType2{
             this._isSelected = false;
         }
     }
-
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
+    
     get connectors(){
         return [this._connector1, this._connector2];
-    }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
-    }    
+    } 
 }
 
 
 
-class TrackType3{
+class TrackType3 extends Track{
 
-    constructor(pos, cWidth, cHeight){
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackType3'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();
     }
     
@@ -495,6 +535,7 @@ class TrackType3{
 
         // this._group.add(this._boundingBox);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape);
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -512,57 +553,26 @@ class TrackType3{
         }
     }
 
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
     get connectors(){
         return [this._connector1, this._connector2];
     }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
-    }    
 }
 
 
-class TrackJunctionType1{
+class TrackJunctionType1 extends Track{
 
-    constructor(pos, cWidth, cHeight){
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackJunctionType1'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 500;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._connector3 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();
     }
     
@@ -636,6 +646,7 @@ class TrackJunctionType1{
 
         // this._group .add( this._track);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape, this._connector3.shape);
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -652,61 +663,30 @@ class TrackJunctionType1{
             this._isSelected = false;
         }
     }
-
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
+    
     get connectors(){
         return [this._connector1, this._connector2, this._connector3];
     }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
-    }    
 }
 
 
 
 
 
-class TrackJunctionType2{
+class TrackJunctionType2 extends Track{
 
-    constructor(pos, cWidth, cHeight){
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackJunctionType2'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 100;
-        this._cHeight = !isNaN(cHeight) ? cHeight : 300;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._connector3 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();
     }
     
@@ -782,6 +762,7 @@ class TrackJunctionType2{
 
         // this._group .add( this._track);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape, this._connector3.shape);
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -799,56 +780,26 @@ class TrackJunctionType2{
         }
     }
 
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
     get connectors(){
         return [this._connector1, this._connector2, this._connector3];
-    }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
     }    
 }
 
-class TrackCrossType1{
+class TrackCrossType1 extends Track{
 
-    constructor(pos, cWidth){
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
         this._options = {
             fill: '#EEE',
             stroke: 'black',
             strokeWidth: 2,
             name: 'TrackCrossType1'
         };
-        this._cWidth = !isNaN(cWidth) ? cWidth : 150;
-        this._pos = !isNaN(pos?.x) && !isNaN(pos?.y) ? pos : {x:0, y:0};
         this._connector1 = null;
         this._connector2 = null;
         this._connector3 = null;
         this._connector4 = null;
         this._track = null;
-        this._group = null;
-        this._isSelected = false;
-        this._onSelect = null;
-        this._id = createUUID();
         this.init();
     }
     
@@ -917,6 +868,7 @@ class TrackCrossType1{
 
         // this._group .add( this._track);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape, this._connector3.shape, this._connector4.shape);
+        this.rotation = this._cRot;
     }
 
     select(p){       
@@ -934,32 +886,7 @@ class TrackCrossType1{
         }
     }
 
-    addToLayer(layer){
-        layer.add(this._group);
-    }
-
-    get selected(){
-        return this._isSelected;
-    }
-
-    get shape(){
-        return this._group;
-    }
-
-    get id(){
-        return this._id;
-    }
-
     get connectors(){
         return [this._connector1, this._connector2, this._connector3, this._connector4];
     }
-
-    get onSelect(){
-        return this._onSelect;
-    }
-
-    set onSelect(callback){
-        if(typeof callback == "function")
-            this._onSelect = callback;
-    }    
 }
