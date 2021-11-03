@@ -241,7 +241,6 @@ class Track{
             actualHeight: this._group.height(),
             initialPos: this._pos,
             initialRotation: this._cRot
-
         }
     }
 

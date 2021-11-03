@@ -13,6 +13,8 @@ let trackMap = new Map();
 let connectorMap = new Map();
 let selectedTrack = null;
 let savedStageData = [];
+let StageDataHistory = [];
+let currentIndex = 0;
 
 let config = {
     snapMaxRot: 20,
@@ -26,18 +28,18 @@ let trackData = [
         width: 2,
         height: 10
     },
-    // {
-    //     type: "TrackJunctionType1",
-    //     pos: {x:500, y:300},
-    //     width: 2,
-    //     height: 10
-    // },
-    // {
-    //     type: "TrackJunctionType2",
-    //     pos: {x:300, y:50},
-    //     width: 2,
-    //     height: 10
-    // },
+    {
+        type: "TrackJunctionType1",
+        pos: {x:500, y:300},
+        width: 2,
+        height: 10
+    },
+    {
+        type: "TrackJunctionType2",
+        pos: {x:300, y:50},
+        width: 2,
+        height: 10
+    },
     {
         type: "TrackType1",
         pos: {x:50, y:450},
@@ -94,11 +96,15 @@ let trackData = [
     },
 ]
 
+
+
 var tr = new Konva.Transformer();
 tr.rotationSnaps([0, 45, 90, 135, 180, 225, 270, 315]);
 tr.rotationSnapTolerance(40);
 tr.resizeEnabled(false);
 tr.anchorSize(20);
+
+
 
 
 function createUUID() {
@@ -108,6 +114,39 @@ function createUUID() {
     });
  }
 
+
+function hookBeforeMod(modinfo){    
+    if(currentIndex<StageDataHistory.length)
+        StageDataHistory = StageDataHistory.slice(0,currentIndex);
+    StageDataHistory.push(saveStageData());
+}
+function hookAfterMod(modinfo){
+    document.getElementById("bForward").setAttribute("disabled",1);
+    document.getElementById("bBack").removeAttribute("disabled");
+    currentIndex = StageDataHistory.length;
+}
+
+
+function saveStageData(){
+    let _savedStageData = [];
+    trackMap.forEach(element => {
+        let data = element.data;
+        data.width = Math.floor(data.width/config.unitSize);
+        data.height = Math.floor(data.height/config.unitSize);
+        _savedStageData.push(data);
+    });
+    return _savedStageData;
+}
+
+
+function loadTrackData(data){
+    trackMap.forEach(element => {
+        removeTrack(layer, element);
+    });            
+    data.forEach(element => {
+        addTrack(element);
+    });
+}
 
 function haveIntersection(r1, r2) {
     return !(
@@ -297,6 +336,15 @@ stage.on('click tap', (e) => {
 });
 
 
+layer.on('dragstart', function (e) {
+
+    var target = e.target;
+    if(target.getType() !== "Group")
+        return;
+
+    hookBeforeMod({type: "move"});
+});
+
 layer.on('dragend', function (e) {
     var target = e.target;
     if(target.getType() !== "Group")
@@ -319,6 +367,8 @@ layer.on('dragend', function (e) {
             })
         }
     });
+
+    hookAfterMod({type: "move"});
 });
 
 layer.on('dragmove', function (e) {
@@ -362,6 +412,7 @@ layer.on('dragmove', function (e) {
     function rotate(dir, button){
         let rot = !!dir ? 45 : -45;
         if(!!selectedTrack){
+            hookBeforeMod({type: "rotate"});
             let _rotation = selectedTrack.shape.getAbsoluteRotation() + rot;
             button.setAttribute("disabled", 1);
             var tween = new Konva.Tween({
@@ -372,10 +423,11 @@ layer.on('dragmove', function (e) {
                     button.removeAttribute("disabled");
                     selectedTrack.rotation = _rotation;
                     updateInfo(selectedTrack);
-                }
-              });
-              tween.play();
-              // selectedTrack.shape.rotate(45);
+               }
+            });
+            tween.play();
+            hookAfterMod({type: "rotate"});
+            // selectedTrack.shape.rotate(45);
         }
     }
 
@@ -384,26 +436,40 @@ layer.on('dragmove', function (e) {
     document.getElementById("bDelete").onclick = function(e) {if(!!selectedTrack) removeTrack(layer, selectedTrack);}
 
     document.getElementById("bSaveStage").onclick = function(e) {
-        savedStageData = [];
-        trackMap.forEach(element => {
-            let data = element.data;
-            data.width = Math.floor(data.width/config.unitSize);
-            data.height = Math.floor(data.height/config.unitSize);
-            savedStageData.push(data);
-        });
-        console.log(savedStageData);
+        savedStageData = saveStageData();
+        document.getElementById("bRestoreStage").removeAttribute("disabled");
+        // console.log(savedStageData);
     }
 
     document.getElementById("bRestoreStage").onclick = function(e) {
         if(savedStageData.length==0)
             return;
-        trackMap.forEach(element => {
-            removeTrack(layer, element);
-        });            
-        savedStageData.forEach(element => {
-            addTrack(element);
-        });
+        StageDataHistory = [];
+        document.getElementById("bForward").setAttribute("disabled", 1);
+        document.getElementById("bBack").setAttribute("disabled", 1);
+        loadTrackData(savedStageData);
     }
+
+    document.getElementById("bBack").onclick = function(e) {
+        if(StageDataHistory.length){
+            if(currentIndex==StageDataHistory.length)
+                StageDataHistory.push(saveStageData());
+            loadTrackData(StageDataHistory[--currentIndex]);
+            document.getElementById("bForward").removeAttribute("disabled");
+        }
+        if(currentIndex==0)
+            document.getElementById("bBack").setAttribute("disabled", 1);        
+    };
+
+    document.getElementById("bForward").onclick = function(e) {
+        if(currentIndex<StageDataHistory.length-1){
+            loadTrackData(StageDataHistory[++currentIndex]);
+            document.getElementById("bBack").removeAttribute("disabled");
+        }
+        
+        if(currentIndex==StageDataHistory.length-1)
+            document.getElementById("bForward").setAttribute("disabled", 1);
+    };
 
 
 
