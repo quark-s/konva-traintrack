@@ -8,6 +8,8 @@ class Connector{
             strokeWidth: 2,
             name: 'connector_m'
         };
+        this._backgroundColor = "#FFF";
+        this._fill = this._options.fill;
         this._cWidth = !isNaN(cWidth) ? cWidth : 150;
         this._cHeight = !isNaN(cHeight) ? cHeight : 50;
         this._inverse = false;
@@ -17,7 +19,7 @@ class Connector{
         this._isSelected = false;
         if(typeof inverse == "boolean" && inverse){
             this._cHeight = -this._cHeight;
-            this._options.fill = "#FFF";
+            this._options.fill = this._backgroundColor;
             this._inverse = true;
             this._options.name =  'connector_f';
         }
@@ -39,7 +41,7 @@ class Connector{
         });
         
         this._shape = new Konva.Shape({
-                sceneFunc: function(context) {
+            sceneFunc: function(context) {
                 context.beginPath();
                 context.moveTo(that._cWidth/3, 0);
                 context.quadraticCurveTo(
@@ -136,12 +138,15 @@ class Connector{
         this._track = track;
     }    
     
+
     get connectedTrack(){
         return this._connectedTrack;
     }
     set connectedTrack(track){
         //TODO validation
         this._connectedTrack = track;
+        if(!!this._shape && this._options.name == "connector_f")
+            this._shape.fill(!!track ? this._fill : this._backgroundColor);
     }    
 
     get inverse(){

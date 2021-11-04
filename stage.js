@@ -172,10 +172,10 @@ function alignTracks(c1, c2){
     trackShape.rotation(trackShape.rotation()-rotDiff);
     c1.connectedTrack = c2.parentTrack;
     c2.connectedTrack = c1.parentTrack;
-    if(!c1.inverse)
-        c1.parentTrack.shape.moveToTop();
-    else
-        c2.parentTrack.shape.moveToTop();
+    // if(!c1.inverse)
+    //     c1.parentTrack.shape.moveToTop();
+    // else
+    //     c2.parentTrack.shape.moveToTop();
     // console.log("align");
     return true;
 }
@@ -231,6 +231,7 @@ function cbTrackSelected(track){
     track.select();
     tr.nodes([track.shape]);
     selectedTrack = track;
+    track.shape.moveToTop();
     updateInfo(selectedTrack);
 }
 
@@ -342,6 +343,7 @@ layer.on('dragstart', function (e) {
     if(target.getType() !== "Group")
         return;
 
+    e.target.moveToTop();
     hookBeforeMod({type: "move"});
 });
 
