@@ -1,7 +1,7 @@
 // first we need to create a stage
 var stage = new Konva.Stage({
     container: 'container',   // id of container <div>
-    width: 1024,
+    width: 1366,
     height: 768
 });
   
@@ -20,83 +20,6 @@ let config = {
     snapMaxRot: 20,
     unitSize: 25        //pixels per grid unit
 }
-
-let trackData = [
-    {
-        type: "TrackCrossType1",
-        pos: {x:450, y:550},
-        width: 2,
-        height: 10
-    },
-    {
-        type: "TrackJunctionType1",
-        pos: {x:500, y:300},
-        width: 2,
-        height: 10
-    },
-    {
-        type: "TrackJunctionType2",
-        pos: {x:300, y:50},
-        width: 2,
-        height: 10
-    },
-    {
-        type: "TrackType1",
-        pos: {x:50, y:450},
-        width: 2,
-        height: 10
-    },
-    {
-        type: "TrackType1",
-        pos: {x:150, y:450},
-        width: 2,
-        height: 4
-    },
-    {
-        type: "TrackType1",
-        pos: {x:150, y:300},
-        width: 2,
-        height: 4
-    },
-    {
-        type: "TrackType2",
-        pos: {x:100, y:50},
-        width: 2,
-        height: 6
-    },
-    {
-        type: "TrackType2",
-        pos: {x:150, y:100},
-        width: 2,
-        height: 6
-    },
-    {
-        type: "TrackType2",
-        pos: {x:290, y:420},
-        width: -2,
-        height: 6
-    },
-    {
-        type: "TrackType2",
-        pos: {x:240, y:360},
-        width: -2,
-        height: 6
-    },
-    {
-        type: "TrackType3",
-        pos: {x:500, y:50},
-        width: -2,
-        height: 10
-    },
-    {
-        type: "TrackType3",
-        pos: {x:550, y:50},
-        width: 2,
-        height: 10
-    },
-]
-
-
 
 var tr = new Konva.Transformer();
 tr.rotationSnaps([0, 45, 90, 135, 180, 225, 270, 315]);
