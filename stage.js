@@ -41,7 +41,7 @@ function createUUID() {
 function hookBeforeMod(modinfo){    
     if(currentIndex<StageDataHistory.length)
         StageDataHistory = StageDataHistory.slice(0,currentIndex);
-    StageDataHistory.push(saveStageData());
+    StageDataHistory.push(saveTrackData());
 }
 function hookAfterMod(modinfo){
     document.getElementById("bForward").setAttribute("disabled",1);
@@ -50,7 +50,7 @@ function hookAfterMod(modinfo){
 }
 
 
-function saveStageData(){
+function saveTrackData(){
     let _savedStageData = [];
     trackMap.forEach(element => {
         let data = element.data;
@@ -65,9 +65,12 @@ function saveStageData(){
 function loadTrackData(data){
     trackMap.forEach(element => {
         removeTrack(layer, element);
-    });            
+    });
     data.forEach(element => {
         addTrack(element);
+    });
+    trackMap.forEach(element => {
+        applyConnectors(element);
     });
 }
 
@@ -78,6 +81,28 @@ function haveIntersection(r1, r2) {
       r2.y > r1.y + r1.height ||
       r2.y + r2.height < r1.y
     );
+}
+
+function applyConnectors(track){
+    if(!track)
+        return;    
+    track.connectors.forEach(c1 => {
+        connectorMap.forEach(c2 => {
+            if(c1 != c2 && c2.parentTrack != c1.parentTrack && c2.inverse == !c1.inverse){
+                if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
+                    let rot1 = c1.shape.getAbsoluteRotation();
+                    let rot2 = c2.shape.getAbsoluteRotation();
+                    // console.log(rot1, rot2);
+                    if(
+                        Math.abs(rot1-rot2) <= config.snapMaxRot 
+                        || (180 - Math.abs(rot1) <= config.snapMaxRot && 180 - Math.abs(rot2) <= config.snapMaxRot )
+                        ){
+                            alignTracks(c1,c2);
+                        }                  
+                }
+            }
+        });
+    });
 }
 
 function alignTracks(c1, c2){
@@ -197,9 +222,7 @@ function removeTrack(_layer, _track){
     return trackMap.delete(_track.id);        
 }
 
-trackData.forEach( (d) => {
-    addTrack(d);
-});
+loadTrackData(trackData);
 
 
 
@@ -304,28 +327,9 @@ layer.on('dragmove', function (e) {
     if(!trackMap.has(target.id()))
         return;
     
-    target.find(".connector_f, .connector_m").forEach(c => {
-        let c1 = connectorMap.get(c.id());
-        if(!c1)
-            return;
-
-        connectorMap.forEach(c2 => {
-            if(c1 != c2 && c2.parentTrack != c1.parentTrack && c2.inverse == !c1.inverse){
-                if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
-                    let rot1 = c1.shape.getAbsoluteRotation();
-                    let rot2 = c2.shape.getAbsoluteRotation();
-                    // console.log(rot1, rot2);
-                    if(
-                        Math.abs(rot1-rot2) <= config.snapMaxRot 
-                        || (180 - Math.abs(rot1) <= config.snapMaxRot && 180 - Math.abs(rot2) <= config.snapMaxRot )
-                        ){
-                            alignTracks(c1,c2);
-                        }                  
-                }
-            }
-        });
-    });
-
+    let track = trackMap.get(target.id());
+    // target.find(".connector_f, .connector_m").forEach(c => {
+    applyConnectors(track);
     updateInfo(trackMap.get(target.id()));
 
   });
@@ -361,7 +365,7 @@ layer.on('dragmove', function (e) {
     document.getElementById("bDelete").onclick = function(e) {if(!!selectedTrack) removeTrack(layer, selectedTrack);}
 
     document.getElementById("bSaveStage").onclick = function(e) {
-        savedStageData = saveStageData();
+        savedStageData = saveTrackData();
         document.getElementById("bRestoreStage").removeAttribute("disabled");
         // console.log(savedStageData);
     }
@@ -378,7 +382,7 @@ layer.on('dragmove', function (e) {
     document.getElementById("bBack").onclick = function(e) {
         if(StageDataHistory.length){
             if(currentIndex==StageDataHistory.length)
-                StageDataHistory.push(saveStageData());
+                StageDataHistory.push(saveTrackData());
             loadTrackData(StageDataHistory[--currentIndex]);
             document.getElementById("bForward").removeAttribute("disabled");
         }
