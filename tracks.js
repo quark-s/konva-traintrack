@@ -1,3 +1,10 @@
+
+function createUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+    });
+}
 class Connector{
     
     constructor(pos, cWidth, cHeight, inverse, parent){
@@ -81,18 +88,22 @@ class Connector{
     }
 
 
-    highlight(p){
-        if(!!p)
-            this._boundingBox.stroke("green");
-        else
-            this._boundingBox.stroke("red");
-    }
+    // highlight(p){
+    //     if(!!p)
+    //         this._boundingBox.stroke("green");
+    //     else
+    //         this._boundingBox.stroke("red");
+    // }
 
-    select(p){
+    highlight(p,color){
+
         if(typeof p == "undefined")
-            p = true; 
+            p = true;
+        if(typeof color !== "string")
+            color = "green";
+
         if(!!p && !this._isSelected){
-            this._shape.stroke("green");
+            this._shape.stroke(color);
             this._isSelected = true;
         }
         else if(this._isSelected){
@@ -197,12 +208,34 @@ class Track{
         });        
     }
 
+    select(p){
+        if(typeof p == "undefined")
+            p = true; 
+
+        if(!!p && !this._isSelected){
+            this.highlight(p);
+            this._isSelected = true;
+        }
+        else if (this._isSelected){
+            this.highlight(0);
+            this._isSelected = false;
+        }        
+    }
+
+    highlight(p,color){
+
+    }
+
     addToLayer(layer){
         layer.add(this._group);
     }
 
     removeFromLayer(){
         this._group.remove();
+    }
+
+    get connectors(){
+        return [];
     }
 
     get selected(){
@@ -232,6 +265,10 @@ class Track{
     }
 
     get data(){
+        let connectors = this.connectors.map((e) => {
+            if(e && e.id)
+                return e.id;
+        });
         return {
             // pos:{
             //     x: this._group.x(),
@@ -245,7 +282,8 @@ class Track{
             actualWidth: this._group.width(),
             actualHeight: this._group.height(),
             initialPos: this._pos,
-            initialRotation: this._cRot
+            initialRotation: this._cRot,
+            connectors: connectors
         }
     }
 
@@ -316,17 +354,22 @@ class TrackType1 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+
+
+    highlight(p,color){
         if(typeof p == "undefined")
-            p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+            p = true;
+        if(typeof color !== "string")
+            color = "green";  
+
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
@@ -432,17 +475,19 @@ class TrackType2 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+    highlight(p,color){       
         if(typeof p == "undefined")
             p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+        if(typeof color !== "string")
+            color = "green";            
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
@@ -542,17 +587,19 @@ class TrackType3 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+    highlight(p,color){       
         if(typeof p == "undefined")
-            p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+            p = true;
+        if(typeof color !== "string")
+            color = "green";            
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
@@ -653,17 +700,19 @@ class TrackJunctionType1 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+    highlight(p,color){       
         if(typeof p == "undefined")
-            p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+            p = true;
+        if(typeof color !== "string")
+            color = "green";            
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
@@ -769,17 +818,19 @@ class TrackJunctionType2 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+    highlight(p,color){       
         if(typeof p == "undefined")
-            p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+            p = true;
+        if(typeof color !== "string")
+            color = "green";
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
@@ -875,17 +926,19 @@ class TrackCrossType1 extends Track{
         this.rotation = this._cRot;
     }
 
-    select(p){       
+    highlight(p,color){       
         if(typeof p == "undefined")
             p = true; 
-        if(!!p && !this._isSelected){
-            this._track.stroke("green");
-            this.connectors.forEach((c) => c.select(1));
+        if(typeof color !== "string")
+            color = "green";            
+        if(!!p){
+            this._track.stroke(color);
+            this.connectors.forEach((c) => c.highlight(1,color));
             this._isSelected = true;
         }
-        else if (this._isSelected){
+        else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.select(0));
+            this.connectors.forEach((c) => c.highlight(0));
             this._isSelected = false;
         }
     }
