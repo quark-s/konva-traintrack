@@ -35,8 +35,10 @@ var TStage = (function () {
             StageDataHistory.push(saveTrackData());
         }
         function hookAfterMod(modinfo){
-            document.getElementById("bForward").setAttribute("disabled",1);
-            document.getElementById("bBack").removeAttribute("disabled");
+            if(!!document.getElementById("bForward") && !!document.getElementById("bBack")){
+                document.getElementById("bForward").setAttribute("disabled",1);
+                document.getElementById("bBack").removeAttribute("disabled");
+            }
             currentIndex = StageDataHistory.length;
         }
 
@@ -86,15 +88,20 @@ var TStage = (function () {
 
 
         function loadTrackData(data){
-            trackMap.forEach(element => {
-                removeTrack(element);
-            });
-            data.forEach(element => {
-                addTrack(element);
-            });
-            trackMap.forEach(element => {
-                applyConnectors(element);
-            });
+            try {
+                trackMap.forEach(element => {
+                    removeTrack(element);
+                });
+                data.forEach(element => {
+                    addTrack(element);
+                });
+                trackMap.forEach(element => {
+                    applyConnectors(element);
+                });
+                return true;
+            } catch (error) {
+                throw new Error("couldn't load stage data: \n" + error);
+            }
         }
 
         function haveIntersection(r1, r2) {
@@ -137,7 +144,7 @@ var TStage = (function () {
                                 c1.parentTrack.highlight(0);
                                 c2.parentTrack.highlight(0);
                             }
-                            console.log(rot1,rot2);
+                            // console.log(rot1,rot2);
                         }
                         else 
                         {
