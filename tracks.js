@@ -95,19 +95,23 @@ class Connector{
     //         this._boundingBox.stroke("red");
     // }
 
-    highlight(p,color){
+    highlight(p,color,fill){
 
         if(typeof p == "undefined")
             p = true;
         if(typeof color !== "string")
             color = "green";
+        if(typeof fill !== "string")
+            fill = "#b6eddb";
 
         if(!!p && !this._isSelected){
             this._shape.stroke(color);
+            this._shape.fill(fill);
             this._isSelected = true;
         }
         else if(this._isSelected){
             this._shape.stroke(this._options.stroke);
+            this._shape.fill(this._options.fill);
             this._isSelected = false;
         }
     }    
@@ -197,10 +201,10 @@ class Track{
         });
         this._group .add( this._track, this._connector1.shape, this._connector2.shape);
         this._group .on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group .on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
@@ -274,6 +278,7 @@ class Track{
             //     x: this._group.x(),
             //     y: this._group.y()
             // },
+            id: this._id,
             type: this._options.name,
             pos: this._group.absolutePosition(),
             width: this._cWidth,
@@ -337,13 +342,15 @@ class TrackType1 extends Track{
             height: this._cHeight,
             id: this.id
         });
+        this._group.offsetX(this._cWidth/2);
+        this._group.offsetY(this._cHeight/2);
         this._group .add( this._track, this._connector1.shape, this._connector2.shape);    
 
         this._group .on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group .on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -356,20 +363,33 @@ class TrackType1 extends Track{
 
 
 
-    highlight(p,color){
+    highlight(p,color,fill){
         if(typeof p == "undefined")
             p = true;
         if(typeof color !== "string")
             color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
 
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
     }
@@ -457,11 +477,14 @@ class TrackType2 extends Track{
             id: this.id
         });
 
+        this._group.offsetX(this._outerRadius/2);
+        this._group.offsetY(this._outerRadius/2);
+
         this._group.on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group.on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -475,22 +498,53 @@ class TrackType2 extends Track{
         this.rotation = this._cRot;
     }
 
-    highlight(p,color){       
+    // highlight(p,color){       
+    //     if(typeof p == "undefined")
+    //         p = true; 
+    //     if(typeof color !== "string")
+    //         color = "green";            
+    //     if(!!p){
+    //         this._track.stroke(color);
+    //         this.connectors.forEach((c) => c.highlight(1,color));
+    //         this._isSelected = true;
+    //     }
+    //     else{
+    //         this._track.stroke(this._options.stroke);
+    //         this.connectors.forEach((c) => c.highlight(0));
+    //         this._isSelected = false;
+    //     }
+    // }
+
+    highlight(p,color,fill){
         if(typeof p == "undefined")
-            p = true; 
+            p = true;
         if(typeof color !== "string")
-            color = "green";            
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
-    }
+    }    
     
     get connectors(){
         return [this._connector1, this._connector2];
@@ -569,11 +623,14 @@ class TrackType3 extends Track{
             id: this.id
         });
 
+        this._group.offsetX(1.25*twidth);
+        this._group.offsetY(0.5*theight);
+
         this._group.on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group.on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -587,19 +644,33 @@ class TrackType3 extends Track{
         this.rotation = this._cRot;
     }
 
-    highlight(p,color){       
+    highlight(p,color,fill){
         if(typeof p == "undefined")
             p = true;
         if(typeof color !== "string")
-            color = "green";            
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
     }
@@ -682,11 +753,14 @@ class TrackJunctionType1 extends Track{
             id: this.id
         });
 
+        this._group.offsetX(1.5*twidth);
+        this._group.offsetY(2*twidth);
+
         this._group.on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group.on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -700,19 +774,33 @@ class TrackJunctionType1 extends Track{
         this.rotation = this._cRot;
     }
 
-    highlight(p,color){       
+    highlight(p,color,fill){
         if(typeof p == "undefined")
             p = true;
         if(typeof color !== "string")
-            color = "green";            
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
     }
@@ -746,7 +834,8 @@ class TrackJunctionType2 extends Track{
     init(){
         
         let twidth = this._cWidth;
-        let theight = this._cHeight;
+        // let theight = this._cHeight;
+        let theight = 5*this._cWidth;
 
         this._connector1 = new Connector({x:0, y: theight+this._options.strokeWidth/2}, twidth, twidth/3, true, this);
         this._connector2 = new Connector({x:0, y: this._options.strokeWidth/2}, this._cWidth, -this._cWidth/3, false, this);
@@ -800,11 +889,14 @@ class TrackJunctionType2 extends Track{
             id: this.id
         });
 
+        this._group.offsetX(1.5*twidth);
+        this._group.offsetY(2.5*twidth);
+
         this._group.on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group.on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -818,19 +910,33 @@ class TrackJunctionType2 extends Track{
         this.rotation = this._cRot;
     }
 
-    highlight(p,color){       
+    highlight(p,color,fill){
         if(typeof p == "undefined")
             p = true;
         if(typeof color !== "string")
-            color = "green";
+            color = "green";  
+        if(typeof fill !== "string")
+            fill = "#b6eddb";
+
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
     }
@@ -908,11 +1014,14 @@ class TrackCrossType1 extends Track{
             id: this.id
         });
 
+        this._group.offsetX(1.5*twidth);
+        this._group.offsetY(1.5*twidth);
+
         this._group.on('mouseover', function () {
-            document.body.style.cursor = 'pointer';
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
         });
         this._group.on('mouseout', function () {
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
         });
 
         // this._group.on('dblclick dbltap', (e) => {
@@ -926,19 +1035,33 @@ class TrackCrossType1 extends Track{
         this.rotation = this._cRot;
     }
 
-    highlight(p,color){       
+    highlight(p,color,fill){
         if(typeof p == "undefined")
-            p = true; 
+            p = true;
         if(typeof color !== "string")
-            color = "green";            
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
         if(!!p){
             this._track.stroke(color);
-            this.connectors.forEach((c) => c.highlight(1,color));
+            this._track.fill(fill);
+            this.connectors.forEach((c) => 
+                {
+                    if(!c.inverse)
+                        c.highlight(1,color,fill)
+                }
+            );
             this._isSelected = true;
         }
         else{
             this._track.stroke(this._options.stroke);
-            this.connectors.forEach((c) => c.highlight(0));
+            this._track.fill(this._options.fill);
+            this.connectors.forEach((c) =>
+                { 
+                    c.highlight(0);
+                }
+            );
             this._isSelected = false;
         }
     }

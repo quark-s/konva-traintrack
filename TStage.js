@@ -3,8 +3,10 @@ var TStage = (function () {
         // first we need to create a stage
         var stage = new Konva.Stage({
             container: 'container',   // id of container <div>
-            width: 1366,
-            height: 768
+            // width: 1366,
+            // height: 768
+            width: 1024*2,
+            height: 768*2
         });
         
         // then create layer
@@ -18,10 +20,45 @@ var TStage = (function () {
         let StageDataHistory = [];
         let currentIndex = 0;
 
+        let scale = 0.85;
+        let boundaries = {
+            0.85: {
+                x: 1043,
+                y: 745
+            },
+            0.75: {
+                x: 1177,
+                y: 845
+            },
+            0.65: {
+                x: 1360,
+                y: 975
+            },
+            0.55: {
+                x: 1610,
+                y: 1150
+            },
+        }
+
+        let currentMove = {
+            id: null,
+            start: null,
+            end: null,
+            pos1:{
+                    x:0,
+                    y:0
+            },
+            pos2:{
+                    x:0,
+                    y:0
+            }
+        }        
+
         let config = {
             snapMaxRot: 20,
             unitSize: 25        //pixels per grid unit
         }
+        let actionStack = [];
 
         var tr = new Konva.Transformer();
         tr.rotationSnaps([0, 45, 90, 135, 180, 225, 270, 315]);
@@ -39,10 +76,16 @@ var TStage = (function () {
                 document.getElementById("bForward").setAttribute("disabled",1);
                 document.getElementById("bBack").removeAttribute("disabled");
             }
+            postLogEvent({
+                stagedata: saveTrackData(),
+                action: modinfo
+            });            
             currentIndex = StageDataHistory.length;
+            actionStack.push(modinfo);
         }
 
         function initGrid(){
+            gridLayer.destroyChildren()
             let nLinesV = Math.floor(stage.width() / config.unitSize);
             let nLinesH = Math.floor(stage.height() / config.unitSize);
             
@@ -115,13 +158,14 @@ var TStage = (function () {
 
         function applyConnectors(track){
             if(!track)
-                return;    
+                return;
+            let numFalseIntersections = 0;
             track.connectors.forEach(c1 => {
                 connectorMap.forEach(c2 => {
-                    if(c1 != c2 && c2.parentTrack != c1.parentTrack){
+                    if(c1 != c2 && c2.parentTrack != c1.parentTrack){                        
                         if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                             let rot1 = c1.shape.getAbsoluteRotation();
-                            let rot2 = c2.shape.getAbsoluteRotation();
+                            let rot2 = c2.shape.getAbsoluteRotation();                            
                             // console.log(rot1, rot2);
                             if(
                                 c2.inverse == !c1.inverse
@@ -136,20 +180,21 @@ var TStage = (function () {
                                 && Math.abs((Math.abs(rot1) + Math.abs(rot2)) - 180) <= config.snapMaxRot 
                             ){
                                 rejectTracks(c1,c2);
-                                c1.parentTrack.highlight(1,"red");
-                                c2.parentTrack.highlight(1,"red");
+                                c1.parentTrack.highlight(1,"red", "#fd9fa8");
+                                c2.parentTrack.highlight(1,"red", "#fd9fa8");
+								numFalseIntersections++;
                             }
-                            else 
+                            else
                             {
-                                c1.parentTrack.highlight(0);
-                                c2.parentTrack.highlight(0);
+                                c1.parentTrack.highlight(c1.parentTrack._group.isDragging());
+                                c2.parentTrack.highlight(c2.parentTrack._group.isDragging());
                             }
                             // console.log(rot1,rot2);
                         }
-                        else 
+                        else if(numFalseIntersections==0)
                         {
-                            c1.parentTrack.highlight(0);
-                            c2.parentTrack.highlight(0);
+                            c1.parentTrack.highlight(c1.parentTrack._group.isDragging());
+                            c2.parentTrack.highlight(c2.parentTrack._group.isDragging());
                         }
                     }
                 });
@@ -195,10 +240,13 @@ var TStage = (function () {
         function updateInfo(track){
             let info = document.getElementById("info");
             track = !!track ? track : selectedTrack;
+            let mpos = stage.getPointerPosition().x + ", " + stage.getPointerPosition().y;
             if(!!track){
                 let type = track.shape.name();
                 let id = track.shape.id();
                 let rot = track.shape.getAbsoluteRotation();
+                let abspos = track.shape.absolutePosition().x + ", " + track.shape.absolutePosition().y;
+                let abspos_ = track.shape.getAbsolutePosition(stage).x + ", " + track.shape.getAbsolutePosition(stage).y;
                 let pos = track.shape.x() + ", " + track.shape.y();
                 let tmp = "";
                 track.connectors.forEach((c,i) => {
@@ -209,14 +257,18 @@ var TStage = (function () {
                 <div>id: ${id}</div>
                 <div>type: ${type}</div>
                 <div>pos: ${pos}</div>
+                <div>abs pos: ${abspos}</div>
+                <div>abs pos (stage): ${abspos_}</div>
                 <div>rotation: ${rot}</div>
                 <br/>
                 <div>connectors: ${tmp}</div>
+                <div>mouse position: ${mpos}</div>
                 `
             }
             // else info.innerHTML = "";
             else info.innerHTML = `
-            <div>nothing selected</div>
+                 <div>nothing selected</div>
+                 <div>mouse position: ${mpos}</div>
             `;
         }
 
@@ -243,7 +295,9 @@ var TStage = (function () {
 
         function addTrack(d){    
             try {
+                let _pos = {x: d.pos.x * stage.scaleX(), y: d.pos.y * (1/stage.scaleX())};
                 let factor = config.unitSize;
+                // let tmp = eval(`new ${d.type}(${JSON.stringify(_pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 // let tmp = new window[d.type](d.pos, d.width, d.height);
                 tmp.onSelect = cbTrackSelected;
@@ -268,6 +322,44 @@ var TStage = (function () {
             return trackMap.delete(_track.id);        
         }
 
+        function zoom(scaleBy){
+            // e.evt.preventDefault();
+            var oldScale = stage.scaleX();
+        
+            var center = {
+                x: stage.width() / 2,
+                y: stage.height() / 2,
+            };
+        
+            var relatedTo = {
+                x: (center.x - stage.x()) / oldScale,
+                y: (center.y - stage.y()) / oldScale,
+            };
+        
+            var newScale = scaleBy;
+            // oldScale * scaleBy;
+            // e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+        
+            stage.scale({
+                x: newScale,
+                y: newScale
+            });
+        
+            var newPos = {
+                x: center.x - relatedTo.x * newScale,
+                y: center.y - relatedTo.y * newScale,
+            };
+            
+            initGrid();
+            stage.position(newPos);
+            stage.batchDraw();
+        }        
+
+
+        function setScale(_scale){
+            scale = (!isNaN(_scale) && _scale <= 0.85 && _scale >= 0.5) ? _scale : 0.85;
+        }
+
         initGrid();
         stage.add(gridLayer);
         stage.add(layer);        
@@ -279,14 +371,34 @@ var TStage = (function () {
             }
         });
 
+        stage.on('mousemove', function (e) {
+            updateInfo();
+        });
+
         layer.on('dragstart', function (e) {
 
             var target = e.target;
             if(target.getType() !== "Group")
                 return;
         
+            let track = trackMap.get(target.id());
+            if(!track)
+                return;
+
             e.target.moveToTop();
-            hookBeforeMod({type: "move"});
+            track.select();
+
+            currentMove.id = track.id;
+            currentMove.pos1.x = track.shape.absolutePosition().x;  
+            currentMove.pos1.y = track.shape.absolutePosition().y;
+            currentMove.start = new Date().getTime();
+            // currentMove.start = new Date().toUTCString();
+            // currentMove.pos1.x = track.shape.x();
+            // currentMove.pos1.y = track.shape.y();
+            hookBeforeMod({
+                type: "move",
+                data: _.cloneDeep(currentMove)
+            });
         });
         
         layer.on('dragend', function (e) {
@@ -312,7 +424,17 @@ var TStage = (function () {
                 }
             });
         
-            hookAfterMod({type: "move"});
+            currentMove.pos2.x = track.shape.absolutePosition().x;
+            currentMove.pos2.y = track.shape.absolutePosition().y;
+            currentMove.end = new Date().getTime();
+            // currentMove.end = new Date().toUTCString();
+            // currentMove.pos2.x = track.shape.x();
+            // currentMove.pos2.y = track.shape.y();            
+            hookAfterMod({
+                type: "move",
+                data: _.cloneDeep(currentMove)
+            });
+            track.select(0);
         });
         
         layer.on('dragmove', function (e) {
@@ -323,6 +445,20 @@ var TStage = (function () {
             if(!trackMap.has(target.id()))
                 return;
             
+            let mpos = stage.getPointerPosition();
+            if(mpos.x<=0){
+                target.x(0);
+            }
+            if(mpos.y<=0){
+                target.y(0);
+            }
+            if(mpos.x >= boundaries[scale].x){
+                target.x(boundaries[scale].x);
+            }
+            if(mpos.y >= boundaries[scale].y){
+                target.y(boundaries[scale].y);
+            }
+
             let track = trackMap.get(target.id());
             // target.find(".connector_f, .connector_m").forEach(c => {
             applyConnectors(track);
@@ -341,6 +477,14 @@ var TStage = (function () {
             "updateInfo": updateInfo,
             "removeTrack": removeTrack,
             "addTrack": addTrack,
+            "zoom": zoom,
+            "setScale": setScale,
+            
+            "initGrid": initGrid,
+            "gridlayer": gridLayer,
+            "layer": layer,
+            "stage": stage,
+
             "saveCurrentStage": function(){
                 savedTrackData = saveTrackData();
             },
