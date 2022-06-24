@@ -27,7 +27,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="bLoadStage" type="button" class="btn btn-primary">Save changes</button>
+                    <button id="bLoadStage" type="button" class="btn btn-primary">Load</button>
                 </div>
                 </div>
             </div>
@@ -54,7 +54,11 @@
             </div>
         </div>
 
-        <div id="container"></div>
+        <div id="wrapper-outer" style=" overflow:hidden;">
+            <div id="wrapper-inner" style="transform-origin: top left;">
+                <div id="container"></div>
+            </div>
+        </div>
         
     </body>
 

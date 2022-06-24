@@ -13,6 +13,10 @@ $('#bLoadStage').on('click', function(){
             $('#playerSlider').attr("min", 0);
             $('#playerSlider').attr("max", stageHistory.length-1);
             $('#playerSlider').attr("value", 0);
+
+            $('#pasteModal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
         }
             else throw new Error("stage data history must be an array of ")
     } catch (error) {
