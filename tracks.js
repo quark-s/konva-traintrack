@@ -302,6 +302,254 @@ class Track{
     }
 }
 
+
+class DemoShape1 extends Track{
+
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
+        this._options = {
+            fill: '#EEE',
+            stroke: 'black',
+            strokeWidth: 2,
+            name: 'DemoShape1'
+        };
+        this._connector1 = null;
+        this._connector2 = null;
+        this._track = null;
+        this.init();        
+    }
+    
+    init() {
+        this._track = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: this._cWidth,
+            height: this._cHeight,
+            fill: this._options.fill,
+            stroke: this._options.stroke,
+            strokeWidth: this._options.strokeWidth,
+            name: this._options.name + '_body',
+            id: createUUID()
+        });               
+
+        this._group = new Konva.Group({
+            draggable: true,
+            name: this._options.name,
+            x: this._pos.x,
+            y: this._pos.y,
+            width: this._cWidth,
+            height: this._cHeight,
+            id: this.id
+        });
+        this._group.offsetX(this._cWidth/2);
+        this._group.offsetY(this._cHeight/2);
+        this._group .add( this._track);    
+
+        this._group .on('mouseover', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
+        });
+        this._group .on('mouseout', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
+        });
+
+        // this._group.on('dblclick dbltap', (e) => {
+        this._group.on('click tap', (e) => {
+            if(typeof this._onSelect == "function")
+                this._onSelect(this);
+        });
+        this.rotation = this._cRot;
+    }
+
+
+
+    highlight(p,color,fill){
+        if(typeof p == "undefined")
+            p = true;
+        if(typeof color !== "string")
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
+        if(!!p){
+            this._track.stroke(color);
+            this._track.fill(fill);
+            this._isSelected = true;
+        }
+        else{
+            this._track.stroke(this._options.stroke);
+            this._track.fill(this._options.fill);
+            this._isSelected = false;
+        }
+    }
+
+    get connectors(){
+        return [];
+    }
+}
+
+class DemoShape2 extends Track{
+
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
+        this._options = {
+            fill: '#EEE',
+            stroke: 'black',
+            strokeWidth: 2,
+            name: 'DemoShape2'
+        };
+        this._connector1 = null;
+        this._connector2 = null;
+        this._track = null;
+        this.init();        
+    }
+    
+    init() {
+        this._track = new Konva.Circle({
+            x: 0,
+            y: 0,
+            radius: this._cWidth,
+            fill: this._options.fill,
+            stroke: this._options.stroke,
+            strokeWidth: this._options.strokeWidth,
+            name: this._options.name + '_body',
+            id: createUUID()
+        });         
+
+        this._group = new Konva.Group({
+            draggable: true,
+            name: this._options.name,
+            x: this._pos.x,
+            y: this._pos.y,
+            width: this._cWidth,
+            height: this._cHeight,
+            id: this.id
+        });
+        this._group .add( this._track);    
+
+        this._group .on('mouseover', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
+        });
+        this._group .on('mouseout', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
+        });
+
+        // this._group.on('dblclick dbltap', (e) => {
+        this._group.on('click tap', (e) => {
+            if(typeof this._onSelect == "function")
+                this._onSelect(this);
+        });
+        this.rotation = this._cRot;
+    }
+
+    highlight(p,color,fill){
+        if(typeof p == "undefined")
+            p = true;
+        if(typeof color !== "string")
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
+        if(!!p){
+            this._track.stroke(color);
+            this._track.fill(fill);
+            this._isSelected = true;
+        }
+        else{
+            this._track.stroke(this._options.stroke);
+            this._track.fill(this._options.fill);
+            this._isSelected = false;
+        }
+    }
+
+    get connectors(){
+        return [];
+    }
+}
+
+class DemoShape3 extends Track{
+
+    constructor(pos, cWidth, cHeight, cRot){
+        super(pos, cWidth, cHeight, cRot);
+        this._options = {
+            fill: '#EEE',
+            stroke: 'black',
+            strokeWidth: 2,
+            name: 'DemoShape3'
+        };
+        this._connector1 = null;
+        this._connector2 = null;
+        this._track = null;
+        this.init();        
+    }
+    
+    init() {
+        this._track = new Konva.RegularPolygon({
+            x: 0,
+            y: 0,
+            sides: 3,
+            radius: this._cWidth,
+            fill: this._options.fill,
+            stroke: this._options.stroke,
+            strokeWidth: this._options.strokeWidth,
+            name: this._options.name + '_body',
+            id: createUUID()
+        });               
+
+        this._group = new Konva.Group({
+            draggable: true,
+            name: this._options.name,
+            x: this._pos.x,
+            y: this._pos.y,
+            width: this._cWidth,
+            height: this._cHeight,
+            id: this.id
+        });
+        // this._group.offsetX(this._cWidth/2);
+        // this._group.offsetY(this._cHeight/2);
+        this._group .add( this._track);    
+
+        this._group .on('mouseover', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_drag.png) 20 15, auto';
+        });
+        this._group .on('mouseout', function () {
+            document.body.style.cursor = 'url(./css/img/cursor_s.png) 20 15, auto';
+        });
+
+        // this._group.on('dblclick dbltap', (e) => {
+        this._group.on('click tap', (e) => {
+            if(typeof this._onSelect == "function")
+                this._onSelect(this);
+        });
+        this.rotation = this._cRot;
+    }
+
+
+
+    highlight(p,color,fill){
+        if(typeof p == "undefined")
+            p = true;
+        if(typeof color !== "string")
+            color = "green";  
+        if(typeof fill !== "string")
+        fill = "#b6eddb";
+
+        if(!!p){
+            this._track.stroke(color);
+            this._track.fill(fill);
+            this._isSelected = true;
+        }
+        else{
+            this._track.stroke(this._options.stroke);
+            this._track.fill(this._options.fill);
+            this._isSelected = false;
+        }
+    }
+
+    get connectors(){
+        return [];
+    }
+}
+
 class TrackType1 extends Track{
 
     constructor(pos, cWidth, cHeight, cRot){

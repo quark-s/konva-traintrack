@@ -1,6 +1,7 @@
 let currentIndex = 0;
 let stageHistory = [];
 let slider = $('#playerSlider');
+let playInterval = null;
 
 $('#bLoadStage').on('click', function(){
     try {
@@ -39,6 +40,31 @@ $('#bPrev').on('click', function(){
     slider.val(currentIndex);
     if(currentIndex == 0)
         $('#bPrev').attr("disabled", 1);
+});
+
+$('#bPlay').on('click', function(){
+    $('#bPrev').attr("disabled", 1);
+    $('#bNext').attr("disabled", 1);
+    $('#bPause').removeAttr("disabled");
+    playInterval = window.setInterval(e => {
+        if(currentIndex<stageHistory.length-1){
+            TStage.loadTrackData(stageHistory[++currentIndex]);
+            slider.val(currentIndex);
+        }
+        else{
+            window.clearInterval(playInterval);
+            $('#bPrev').removeAttr("disabled");
+        }
+    }, 2000);
+});
+
+$('#bPause').on('click', function(){
+    window.clearInterval(playInterval);
+    $('#bPause').attr("disabled", 1);
+    if(currentIndex>0)
+        $('#bPrev').removeAttr("disabled");
+    if(currentIndex<stageHistory.length-1)
+        $('#bNext').removeAttr("disabled");
 });
 
 $('#playerSlider').on("input", function(){

@@ -301,6 +301,9 @@ var TStage = (function () {
                 let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 // let tmp = new window[d.type](d.pos, d.width, d.height);
                 tmp.onSelect = cbTrackSelected;
+                tmp.shape.on('dragstart', dragstart);
+                tmp.shape.on('dragend', dragend);
+                tmp.shape.on('dragmove', dragmove);
                 trackMap.set(tmp.id, tmp);
                 tmp.connectors.forEach((c) => {
                     if(!!c)
@@ -360,23 +363,8 @@ var TStage = (function () {
             scale = (!isNaN(_scale) && _scale <= 0.85 && _scale >= 0.5) ? _scale : 0.85;
         }
 
-        initGrid();
-        stage.add(gridLayer);
-        stage.add(layer);        
-        // layer.draw();        
-
-        stage.on('click tap', (e) => {    
-            if(!!selectedTrack && e.target === stage || e.target === layer){
-                deselectAllTracks(layer);
-            }
-        });
-
-        stage.on('mousemove', function (e) {
-            updateInfo();
-        });
-
-        layer.on('dragstart', function (e) {
-
+        function dragstart(e) {
+            // console.log("dragstart");
             var target = e.target;
             if(target.getType() !== "Group")
                 return;
@@ -386,7 +374,11 @@ var TStage = (function () {
                 return;
 
             e.target.moveToTop();
-            track.select();
+
+            // dragging while a transformer contains nodes will cause an exception => deselect all first
+            deselectAllTracks();
+            // make it appear selected visually
+            track.highlight();
 
             currentMove.id = track.id;
             currentMove.pos1.x = track.shape.absolutePosition().x;  
@@ -399,9 +391,10 @@ var TStage = (function () {
                 type: "move",
                 data: _.cloneDeep(currentMove)
             });
-        });
-        
-        layer.on('dragend', function (e) {
+        }
+
+        function dragend (e) {
+            // console.log("dragend");
             var target = e.target;
             if(target.getType() !== "Group")
                 return;
@@ -434,10 +427,13 @@ var TStage = (function () {
                 type: "move",
                 data: _.cloneDeep(currentMove)
             });
-            track.select(0);
-        });
-        
-        layer.on('dragmove', function (e) {
+
+            // @see dragstart => add track to transformer again 
+            cbTrackSelected(track);
+        }
+
+        function dragmove(e) {
+            // console.log("dragmove");
             var target = e.target;
             if(target.getType() !== "Group")
                 return;
@@ -463,8 +459,26 @@ var TStage = (function () {
             // target.find(".connector_f, .connector_m").forEach(c => {
             applyConnectors(track);
             updateInfo(trackMap.get(target.id()));
-        
-        });        
+        }
+
+        initGrid();
+        stage.add(gridLayer);
+        stage.add(layer);        
+        // layer.draw();        
+
+        stage.on('click tap', (e) => {    
+            if(!!selectedTrack && e.target === stage || e.target === layer){
+                deselectAllTracks(layer);
+            }
+        });
+
+        stage.on('mousemove', function (e) {
+            updateInfo();
+        });
+
+        // stage.on('dragstart', dragstart);        
+        // stage.on('dragend', dragend);        
+        // stage.on('dragmove', dragmove);        
 
         //public elements
         return {
