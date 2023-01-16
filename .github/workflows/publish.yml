@@ -10,7 +10,8 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with: 
-            path: 'public'     
+            path: 'public'
+      - name: publish
         uses: s0/git-publish-subdir-action@develop
         env:
             REPO: self
