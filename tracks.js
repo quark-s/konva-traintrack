@@ -268,6 +268,10 @@ class Track{
         return this._id;
     }
 
+    set id(id){
+        this._id = id;
+    }
+
     get data(){
         let connectors = this.connectors.map((e) => {
             if(e && e.id)

@@ -20,6 +20,8 @@ var TStage = (function () {
         let StageDataHistory = [];
         let currentIndex = 0;
 
+        let replayMode = false;
+
         let scale = 0.85;
         let boundaries = {
             0.85: {
@@ -176,7 +178,8 @@ var TStage = (function () {
                             }
 
                             else if(
-                                c2.inverse == c1.inverse
+                                !replayMode
+                                && c2.inverse == c1.inverse
                                 && Math.abs((Math.abs(rot1) + Math.abs(rot2)) - 180) <= config.snapMaxRot 
                             ){
                                 rejectTracks(c1,c2);
@@ -243,7 +246,7 @@ var TStage = (function () {
             let mpos = stage.getPointerPosition().x + ", " + stage.getPointerPosition().y;
             if(!!track){
                 let type = track.shape.name();
-                let id = track.shape.id();
+                let id = track.id;
                 let rot = track.shape.getAbsoluteRotation();
                 let abspos = track.shape.absolutePosition().x + ", " + track.shape.absolutePosition().y;
                 let abspos_ = track.shape.getAbsolutePosition(stage).x + ", " + track.shape.getAbsolutePosition(stage).y;
@@ -270,6 +273,11 @@ var TStage = (function () {
                  <div>nothing selected</div>
                  <div>mouse position: ${mpos}</div>
             `;
+        }
+
+        function selectTrack(id){
+            if(trackMap.has(id))
+                cbTrackSelected(trackMap.get(id))
         }
 
         function cbTrackSelected(track){
@@ -300,10 +308,14 @@ var TStage = (function () {
                 // let tmp = eval(`new ${d.type}(${JSON.stringify(_pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 // let tmp = new window[d.type](d.pos, d.width, d.height);
-                tmp.onSelect = cbTrackSelected;
-                tmp.shape.on('dragstart', dragstart);
-                tmp.shape.on('dragend', dragend);
-                tmp.shape.on('dragmove', dragmove);
+                if(!!d.id && replayMode)
+                    tmp.id = d.id;
+                if(!replayMode){
+                    tmp.onSelect = cbTrackSelected;
+                    tmp.shape.on('dragstart', dragstart);
+                    tmp.shape.on('dragend', dragend);
+                    tmp.shape.on('dragmove', dragmove);
+                }
                 trackMap.set(tmp.id, tmp);
                 tmp.connectors.forEach((c) => {
                     if(!!c)
@@ -486,6 +498,7 @@ var TStage = (function () {
             "layer": layer,
             "loadTrackData": loadTrackData,
             "getSelectedTrack": function(){return selectedTrack;},
+            "selectTrack": function(id){return selectTrack(id);},
             "hookBeforeMod": hookBeforeMod,
             "hookAfterMod": hookAfterMod,
             "updateInfo": updateInfo,
@@ -498,6 +511,9 @@ var TStage = (function () {
             "gridlayer": gridLayer,
             "layer": layer,
             "stage": stage,
+            "toggleReplayMode": function(){
+                replayMode = !replayMode;
+            },
 
             "saveCurrentStage": function(){
                 savedTrackData = saveTrackData();
