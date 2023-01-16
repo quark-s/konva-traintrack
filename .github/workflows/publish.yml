@@ -4,13 +4,15 @@ on:
     branches:
       - main
 jobs:
-  pci:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with: 
             path: 'public'
+      - name: debug
+        run: ls -lat public
       - name: publish
         uses: s0/git-publish-subdir-action@develop
         env:
