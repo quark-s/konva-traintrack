@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Konva</title>
+        <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+        
+        <script src="lib/konva.min.js"></script>
+        <script src="lib/lodash.min.js"></script>
+        <script src="lib/bootstrap.min.js"></script>
+        <script src="lib/jquery.slim.min.js"></script>
+
+        <script type="module"  src="player.js"></script>
+
+        <link rel="stylesheet" href="css/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+
+        <style>
+
+            #actions-wrapper {
+                font-size: .7em;
+                /* max-width: 200px; */
+                margin-left: 1060px;
+                padding-top: 20px;
+                white-space: nowrap;
+            }
+            
+            #actions-wrapper ul{
+                list-style: none;
+            }
+
+            #actions-wrapper ul li{
+                padding-bottom: 1em;
+            }
+
+            #actions-wrapper ul li div.last{
+                background-color: #b6eddb;
+            }
+
+            body #info{
+                bottom: 10px;
+                top: auto;
+            }
+        </style>
+
+    </head>
+    <body>
+        
+        <div id="info">nothing selected</div>        
+          
+        <!-- Modal -->
+        <div class="modal fade" id="pasteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Paste traintrack stage history JSON</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="stageData" rows="10" style="width: 100%;"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="bLoadStage" type="button" class="btn btn-primary">Load</button>
+                </div>
+                </div>
+            </div>
+        </div>          
+
+        <div style="float: left; width: 1100px;">
+            <div id="menu" class="header menu">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal">
+                                Load stage history
+                            </button>
+                            <button disabled="1" class="btn btn-secondary" id="bPrev"><i class="bi bi-skip-start-fill"></i></button>
+                            <button disabled="1" class="btn btn-secondary" id="bPause"><i class="bi bi-pause-fill"></i></button>
+                            <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>
+                            <button disabled="1" class="btn btn-secondary" id="bNext"><i class="bi bi-skip-end-fill"></i></button>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="slidecontainer">
+                                <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
+                <div id="wrapper-inner" style="transform-origin: top left;">
+                    <div id="container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="actions-wrapper">
+            <div id="actions">
+                <traintrack-log id="log"></traintrack-log>
+            </div>
+        </div>
+        
+    </body>
+
+    <script src="tracks.js"></script>
+    <script src="trackdata.js"></script>
+    <script src="TStage.js"></script>    
+
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+    <!-- <script src="./node_modules/jquery-slim/dist/jquery.slim.min.js"></script> -->
+    <!-- <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+
+</html>

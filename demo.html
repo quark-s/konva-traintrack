@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Konva</title>
+        <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+        <script src="lib/konva.min.js"></script>
+        <script src="lib/lodash.min.js"></script>
+        <script src="lib/bootstrap.min.js"></script>
+        <script src="lib/log.js"></script>
+        <link rel="stylesheet" href="css/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        
+        <div id="info">nothing selected</div>
+
+        <div id="menu" class="header menu">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-3">
+                            <div id="rotate">
+                                <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>
+                                <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                <button class="btn btn-primary" id="bZoomIn"><i class="bi bi-zoom-in"></i></button>
+                                <button  class="btn btn-primary" id="bZoomOut"><i class="bi bi-zoom-out"></i></button>
+                                <button  class="btn btn-danger" id="bDelete"><i class="bi bi-trash"></i></button>
+                            </div>
+                    </div>
+                    <div class="col-sm-3">
+                            <div id="create">
+
+                                <select id="addTrackType"></select><br/>
+                                
+                                <!-- <input class="create-scale" id="selHeight" maxlength="3" type="text"> -->
+                                <div id="create-scale" class="input-group input-group-sm mb-3">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text" id="label-width">W/H</span>
+                                    </div>
+                                    <input class="form-control" value="2" aria-label="width" aria-describedby="label-width" id="addTrackWidth" maxlength="2" type="text">
+                                    <input class="form-control" value="6" aria-label="height" aria-describedby="label-width" id="addTrackHeight" maxlength="2" type="text">
+                                    <button class="btn btn-primary" id="bAddTrack">add</button>
+                                </div>                                          
+                
+                            </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-secondary" title="quicksave" id="bSaveStage"><i class="bi bi-cloud-arrow-down"></i></button>
+                        <button class="btn btn-secondary" title="quickload" disabled="1" id="bRestoreStage"><i class="bi bi-cloud-arrow-up"></i></button>
+                        <button class="btn btn-secondary" title="undo" disabled="1" id="bBack"><i class="bi bi-arrow-left-circle"></i></button>
+                        <button class="btn btn-secondary" title="redo" disabled="1" id="bForward"><i class="bi bi-arrow-right-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
+            <div id="wrapper-inner" style="transform-origin: top left;">
+                <div id="container"></div>
+            </div>
+        </div>
+        
+    </body>
+    <script src="tracks.js"></script>
+    <script src="shapes/demo.js"></script>
+    <script src="TStage_demo.js"></script>
+    <script src="index.js"></script>
+</html>
