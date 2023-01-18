@@ -82,7 +82,7 @@ class TraintrackLog extends LitElement {
 
   customElements.define('traintrack-log', TraintrackLog);
 
- window.onload = function(){
+ window.onload = function(){    
 
     (function(){
             let currentIndex = 0;
@@ -94,12 +94,29 @@ class TraintrackLog extends LitElement {
             
             TStage.toggleReplayMode();
             
-            $('#bLoadStage').on('click', function(){
+            const input = document.querySelector('#history-upload');
+            input.addEventListener('change', () => {
+                const file = input.files[0];
+                var reader = new FileReader();                
+                reader.onload = event => {
+                    // console.log(JSON.parse(event.target.result));
+                    try {
+                        let result = JSON.parse(event.target.result);
+                        loadStageHistory(event, result);
+                    } catch (error) {
+                        console.error(error);
+                    }
+                };
+                reader.readAsText(file);
+                console.log(file);
+            });
+            
+            function loadStageHistory(event, json){
                 window.clearInterval(playInterval);
                 try {
                     stageHistory = [];
                     actions = [];        
-                    let data = JSON.parse($('#stageData').val());        
+                    let data = json ?? JSON.parse($('#stageData').val());        
                     let stagedata = null;
                     slider.val(0);
                     currentIndex = 0;
@@ -134,7 +151,13 @@ class TraintrackLog extends LitElement {
                 } catch (error) {
                     console.error("could parse stage data: ", error);
                 }
+            }
+
+            $('#btn-history-upload').on('click', function(){
+                input.click();
             });
+
+            $('#bLoadStage').on('click', loadStageHistory);
 
             $('#bNext').on('click', function(){
                 

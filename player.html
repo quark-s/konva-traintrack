@@ -71,16 +71,20 @@
             <div id="menu" class="header menu">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-4">
+                        <div class="col-sm-7">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal">
                                 Load stage history
                             </button>
+                            <button type="button" id="btn-history-upload" class="btn btn-primary">
+                                Upload history from file
+                            </button>
+                            <input hidden type="file" id="history-upload">
                             <button disabled="1" class="btn btn-secondary" id="bPrev"><i class="bi bi-skip-start-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPause"><i class="bi bi-pause-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bNext"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-sm-4">
                             <div class="slidecontainer">
                                 <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
                             </div>
