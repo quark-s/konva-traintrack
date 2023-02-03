@@ -34,13 +34,15 @@ class TraintrackLog extends LitElement {
     }
 
     renderActionDetails(data){
+        if(!data || !Object.keys(data).length)
+            return '';
         return html`
             ${Object.keys(data).map(e => {
                 return html`
                     <strong>${e}: </strong>${JSON.stringify(data[e])}<br/>
                 `
             })}
-        `
+        `;
     }
 
     renderAction(action, i){
@@ -48,7 +50,8 @@ class TraintrackLog extends LitElement {
         return html`
             <div class="${_class}">
                 <div><strong>type: </strong> ${action?.type}</div>
-                <div><strong>relative time: </strong> ${action?.relativeTime}</div>
+                <div><strong>relative time: </strong> ${action?.relativeTime/1000} s</div>
+                <div><strong>timestamp: </strong> ${action?.timeStamp ? new Date(action.timeStamp).toLocaleString() : 'n/a'}</div>
                 <div><strong><a data-bs-toggle="collapse" href="#collapse-${i}" role="button" aria-expanded="false" aria-controls="collapse-${i}">details</a></strong></div>
                 <div class="collapse" id="collapse-${i}">${this.renderActionDetails(action.data)}</div>
             </div>
@@ -63,7 +66,7 @@ class TraintrackLog extends LitElement {
         if(TStage){
             try {
                 let _actions = this.actions.slice(-this.max);
-                TStage.selectTrack(_actions[_actions.length-1].data.id);
+                TStage.selectTrack(_actions[_actions.length-1]?.data?.id);
             } catch (error) {
                 console.error(error);   
             }
@@ -91,6 +94,7 @@ class TraintrackLog extends LitElement {
             let slider = $('#playerSlider');
             slider.val(0);
             let playInterval = null;
+            let relativeTimeDiff = 0;
             
             TStage.toggleReplayMode();
             
@@ -118,6 +122,7 @@ class TraintrackLog extends LitElement {
                     actions = [];        
                     let data = json ?? JSON.parse($('#stageData').val());        
                     let stagedata = null;
+                    relativeTimeDiff = data[0].relativeTime;
                     slider.val(0);
                     currentIndex = 0;
                     let i = 0;
@@ -127,11 +132,13 @@ class TraintrackLog extends LitElement {
                             stagedata = data[i].stagedata;
                         i++;
                     } while (!stagedata && i < data.length-1);
-                
+                    
                     data.forEach(element => {
                         if(!!element.stagedata && Object.keys(element.stagedata).length>0)
                             stagedata = element.stagedata;            
                         stageHistory.push(stagedata);
+                        if(element?.action?.relativeTime)
+                            element.action.relativeTime -= relativeTimeDiff;
                         actions.push(element?.action);
                     });
                     if(TStage.loadTrackData(stageHistory[0])){
