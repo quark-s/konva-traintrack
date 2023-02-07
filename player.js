@@ -51,7 +51,7 @@ class TraintrackLog extends LitElement {
             <div class="${_class}">
                 <div><strong>type: </strong> ${action?.type}</div>
                 <div><strong>relative time: </strong> ${action?.relativeTime/1000} s</div>
-                <div><strong>timestamp: </strong> ${action?.timeStamp ? new Date(action.timeStamp).toLocaleString() : 'n/a'}</div>
+                <div><strong>timestamp: </strong> ${action?.timeStamp ? new Date(action.timeStamp).toLocaleString('de-DE', {timeZone: 'CET'}) : 'n/a'}</div>
                 <div><strong><a data-bs-toggle="collapse" href="#collapse-${i}" role="button" aria-expanded="false" aria-controls="collapse-${i}">details</a></strong></div>
                 <div class="collapse" id="collapse-${i}">${this.renderActionDetails(action.data)}</div>
             </div>
