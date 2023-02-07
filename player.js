@@ -47,10 +47,12 @@ class TraintrackLog extends LitElement {
 
     renderAction(action, i){
         let _class = i==this.actions.slice(-this.max).length-1 ? "last" : "";
+        let _relativeTime = moment.duration(action?.relativeTime);
         return html`
             <div class="${_class}">
                 <div><strong>type: </strong> ${action?.type}</div>
-                <div><strong>relative time: </strong> ${action?.relativeTime/1000} s</div>
+                <div><strong>relative time: </strong> ${_relativeTime.hours().toString().padStart(2, "0")}:${_relativeTime.minutes().toString().padStart(2, "0")}:${_relativeTime.seconds().toString().padStart(2, "0")}.${_relativeTime.milliseconds()}</div>
+                <div><strong>relative time (seoconds): </strong> ${action?.relativeTime/1000} s</div>
                 <div><strong>timestamp: </strong> ${action?.timeStamp ? new Date(action.timeStamp).toLocaleString('de-DE', {timeZone: 'CET'}) : 'n/a'}</div>
                 <div><strong><a data-bs-toggle="collapse" href="#collapse-${i}" role="button" aria-expanded="false" aria-controls="collapse-${i}">details</a></strong></div>
                 <div class="collapse" id="collapse-${i}">${this.renderActionDetails(action.data)}</div>
