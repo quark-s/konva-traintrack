@@ -164,7 +164,7 @@ var TStage = (function () {
             let numFalseIntersections = 0;
             track.connectors.forEach(c1 => {
                 connectorMap.forEach(c2 => {
-                    if(c1 != c2 && c2.parentTrack != c1.parentTrack){                        
+                    if(c1 != c2 && c2.parentTrack.id != c1.parentTrack.id){                        
                         if(Konva.Util.haveIntersection(c1.boundingBox.getClientRect(), c2.boundingBox.getClientRect())){
                             let rot1 = c1.shape.getAbsoluteRotation();
                             let rot2 = c2.shape.getAbsoluteRotation();                            
@@ -253,7 +253,7 @@ var TStage = (function () {
                 let pos = track.shape.x() + ", " + track.shape.y();
                 let tmp = "";
                 track.connectors.forEach((c,i) => {
-                    let shape = c?.connectedTrack ? c.connectedTrack.shape.id() : "none";
+                    let shape = c?.connectedTrack ? c.connectedTrack.id : "none";
                     tmp += `<div>connector ${i}: ${shape} </div>`;
                 });
                 info.innerHTML = `
@@ -316,6 +316,9 @@ var TStage = (function () {
                     tmp.shape.on('dragend', dragend);
                     tmp.shape.on('dragmove', dragmove);
                 }
+
+                tmp.onSelect = cbTrackSelected;
+
                 trackMap.set(tmp.id, tmp);
                 tmp.connectors.forEach((c) => {
                     if(!!c)
