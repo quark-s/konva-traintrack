@@ -124,6 +124,7 @@ class TraintrackLog extends LitElement {
                     actions = [];        
                     let data = json ?? JSON.parse($('#stageData').val());        
                     let stagedata = null;
+                    data.sort((a,b) => a.relativeTime - b.relativeTime);
                     relativeTimeDiff = data[0].relativeTime;
                     slider.val(0);
                     currentIndex = 0;

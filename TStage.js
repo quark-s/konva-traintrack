@@ -243,7 +243,7 @@ var TStage = (function () {
         function updateInfo(track){
             let info = document.getElementById("info");
             track = !!track ? track : selectedTrack;
-            let mpos = stage.getPointerPosition().x + ", " + stage.getPointerPosition().y;
+            let mpos = stage.getPointerPosition()?.x + ", " + stage.getPointerPosition()?.y;
             if(!!track){
                 let type = track.shape.name();
                 let id = track.id;
