@@ -10,7 +10,7 @@
         <script src="lib/jquery.slim.min.js"></script>
         <script src="lib/moment.min.js"></script>        
 
-        <script type="module"  src="player.js"></script>
+        <script type="module"  src="player_fixdata.js"></script>
 
         <link rel="stylesheet" href="css/bootstrap-icons.css">
         <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -47,41 +47,13 @@
     </head>
     <body>
         
-        <div id="info">nothing selected</div>        
-          
-        <!-- Modal -->
-        <div class="modal fade" id="pasteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Paste traintrack stage history JSON</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <textarea id="stageData" rows="10" style="width: 100%;"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="bLoadStage" type="button" class="btn btn-primary">Load</button>
-                </div>
-                </div>
-            </div>
-        </div>          
+        <div id="info">nothing selected</div>               
 
         <div style="float: left; width: 1100px;">
             <div id="menu" class="header menu">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-8">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal">
-                                Load stage history
-                            </button>
-                            <!--
-                            <button type="button" id="btn-history-upload" class="btn btn-primary">
-                                Upload history from file
-                            </button>
-                            -->
-                            <input type="file" id="history-upload">
                             <button disabled="1" class="btn btn-secondary" id="bPrev"><i class="bi bi-skip-start-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPause"><i class="bi bi-pause-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>

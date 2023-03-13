@@ -311,11 +311,11 @@ var TStage = (function () {
                 if(!!d.id && replayMode)
                     tmp.id = d.id;
                 if(!replayMode){
-                    tmp.onSelect = cbTrackSelected;
                     tmp.shape.on('dragstart', dragstart);
                     tmp.shape.on('dragend', dragend);
                     tmp.shape.on('dragmove', dragmove);
                 }
+                tmp.onSelect = cbTrackSelected;
 
                 tmp.onSelect = cbTrackSelected;
 
