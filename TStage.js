@@ -19,6 +19,8 @@ var TStage = (function () {
         let savedTrackData = [];
         let StageDataHistory = [];
         let currentIndex = 0;
+        let lastConnected = [null,null];
+        let lastRejected = [null,null];
 
         let replayMode = false;
 
@@ -68,12 +70,14 @@ var TStage = (function () {
         tr.resizeEnabled(false);
         tr.anchorSize(20);
 
-        function hookBeforeMod(modinfo){    
+        function hookBeforeMod(modinfo){   
+            console.log(modinfo?.type, "start", Date.now()); 
             if(currentIndex<StageDataHistory.length)
                 StageDataHistory = StageDataHistory.slice(0,currentIndex);
             StageDataHistory.push(saveTrackData());
         }
         function hookAfterMod(modinfo){
+            console.log(modinfo?.type, "end", Date.now());
             if(!!document.getElementById("bForward") && !!document.getElementById("bBack")){
                 document.getElementById("bForward").setAttribute("disabled",1);
                 document.getElementById("bBack").removeAttribute("disabled");
@@ -175,6 +179,8 @@ var TStage = (function () {
                                 || (180 - Math.abs(rot1) <= config.snapMaxRot && 180 - Math.abs(rot2) <= config.snapMaxRot )
                             ){
                                 alignTracks(c1,c2);
+                                logConnected(c1,c2);
+                                return;
                             }
 
                             else if(
@@ -186,6 +192,8 @@ var TStage = (function () {
                                 c1.parentTrack.highlight(1,"red", "#fd9fa8");
                                 c2.parentTrack.highlight(1,"red", "#fd9fa8");
 								numFalseIntersections++;
+                                logRejected(c1,c2);
+                                return;
                             }
                             else
                             {
@@ -194,10 +202,19 @@ var TStage = (function () {
                             }
                             // console.log(rot1,rot2);
                         }
-                        else if(numFalseIntersections==0)
-                        {
-                            c1.parentTrack.highlight(c1.parentTrack._group.isDragging());
-                            c2.parentTrack.highlight(c2.parentTrack._group.isDragging());
+                        else{
+                            if(numFalseIntersections==0)
+                            {
+                                c1.parentTrack.highlight(c1.parentTrack._group.isDragging());
+                                c2.parentTrack.highlight(c2.parentTrack._group.isDragging());
+                            }
+                            if(lastConnected.includes(c1) && lastConnected.includes(c2)){                                
+                                logDisconnected(c1,c2);
+                            }
+                            if(lastRejected.includes(c1) && lastRejected.includes(c2)){
+                                lastRejected = [null,null];
+                                console.log("reject0");
+                            }
                         }
                     }
                 });
@@ -223,8 +240,68 @@ var TStage = (function () {
             //     c1.parentTrack.shape.moveToTop();
             // else
             //     c2.parentTrack.shape.moveToTop();
-            // console.log("align");
+            console.log("align");
             return true;
+        }
+
+        function logConnected(c1,c2){
+            if(!lastConnected.includes(c1) || !lastConnected.includes(c2)){
+                postLogEvent({
+                    action: {
+                        type: "connect",
+                        data: {
+                            tracks: [c1.parentTrack.id, c2.parentTrack.id],
+                            connectorIds: [c1.parentTrack.connectors.indexOf(c1), c2.parentTrack.connectors.indexOf(c2)],
+                            timestamp: new Date().getTime()
+                        }
+                    }
+                });
+                lastConnected = [c1,c2];
+            }
+        }
+
+        function logDisconnected(c1,c2){            
+            if(lastConnected.includes(c1) && lastConnected.includes(c2)){
+                postLogEvent({
+                    action: {
+                        type: "disconnect",
+                        data: {
+                            tracks: [c1.parentTrack.id, c2.parentTrack.id],
+                            connectorIdx: [c1.parentTrack.connectors.indexOf(c1), c2.parentTrack.connectors.indexOf(c2)],
+                            timestamp: new Date().getTime()
+                        }
+                    }
+                });
+                lastConnected = [null,null];
+            }
+        }
+
+        function logRejected(c1,c2){
+            if(!lastRejected.includes(c1) || !lastRejected.includes(c2)){
+                postLogEvent({
+                    action: {
+                        type: "missmatch",
+                        data: {
+                            tracks: [c1.parentTrack.id, c2.parentTrack.id],
+                            connectorIdx: [c1.parentTrack.connectors.indexOf(c1), c2.parentTrack.connectors.indexOf(c2)],
+                            timestamp: new Date().getTime()
+                        }
+                    }
+                });
+                lastRejected = [c1,c2];
+            }
+        }
+
+        function logTrackSelected(track,e){
+            postLogEvent({
+                action: {
+                    type: "select-track",
+                    data: {
+                        id: track.id,
+                        timestamp: new Date().getTime()
+                    }
+                }
+            });
         }
 
 
@@ -280,13 +357,14 @@ var TStage = (function () {
                 cbTrackSelected(trackMap.get(id))
         }
 
-        function cbTrackSelected(track){
+        function cbTrackSelected(track,e){
             deselectAllTracks(layer);
             track.select();
             tr.nodes([track.shape]);
             selectedTrack = track;
             track.shape.moveToTop();
             updateInfo(selectedTrack);
+            logTrackSelected(track,e);
         }
 
         function deselectAllTracks(){
@@ -305,6 +383,14 @@ var TStage = (function () {
             try {
                 let _pos = {x: d.pos.x * stage.scaleX(), y: d.pos.y * (1/stage.scaleX())};
                 let factor = config.unitSize;
+                
+                //reset connectors - will be applyied on stage
+                if(Array.isArray(d.connectors) && d.connectors.length){
+                    d.connectors.forEach((c,i) => {
+                        d.connectors[i] = null;
+                    })
+                }
+
                 // let tmp = eval(`new ${d.type}(${JSON.stringify(_pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 let tmp = eval(`new ${d.type}(${JSON.stringify(d.pos)}, ${factor*parseInt(d.width)}, ${factor*parseInt(d.height)}, ${d.rotation})`);
                 // let tmp = new window[d.type](d.pos, d.width, d.height);
@@ -316,8 +402,7 @@ var TStage = (function () {
                     tmp.shape.on('dragmove', dragmove);
                 }
                 tmp.onSelect = cbTrackSelected;
-
-                tmp.onSelect = cbTrackSelected;
+//                tmp.onSelect = cbTrackSelected;
 
                 trackMap.set(tmp.id, tmp);
                 tmp.connectors.forEach((c) => {
@@ -394,6 +479,7 @@ var TStage = (function () {
             deselectAllTracks();
             // make it appear selected visually
             track.highlight();
+            // cbTrackSelected(track);
 
             currentMove.id = track.id;
             currentMove.pos1.x = track.shape.absolutePosition().x;  

@@ -65,6 +65,18 @@ TStage.loadTrackData(trackData);
 		document.getElementById("bDelete").onclick = function(e) {if(!!TStage.getSelectedTrack()) TStage.removeTrack(TStage.getSelectedTrack());}
 	}
 	
+	if(!!document.getElementById("bDownloadLogData")){
+		document.getElementById("bDownloadLogData").onclick = function(e) {
+			LogHistory.downloadLogs();
+		}
+	}
+
+	if(!!document.getElementById("bDownloadLogDataComplete")){
+		document.getElementById("bDownloadLogDataComplete").onclick = function(e) {
+			LogHistory.downloadLogsComplete();
+		}
+	}
+	
 	if(!!document.getElementById("bSaveStage")){
 		document.getElementById("bSaveStage").onclick = function(e) {
 			TStage.saveCurrentStage();

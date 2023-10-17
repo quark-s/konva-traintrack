@@ -208,7 +208,7 @@ class Track{
         });
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         });        
     }
 
@@ -361,7 +361,7 @@ class DemoShape1 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         });
         this.rotation = this._cRot;
     }
@@ -442,7 +442,7 @@ class DemoShape2 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         });
         this.rotation = this._cRot;
     }
@@ -524,7 +524,7 @@ class DemoShape3 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         });
         this.rotation = this._cRot;
     }
@@ -610,7 +610,7 @@ class TrackType1 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         });
         this.rotation = this._cRot;
     }
@@ -708,18 +708,18 @@ class TrackType2 extends Track{
             id: createUUID(),
         });
 
-        let boundingBox = this._track.getClientRect();
-        this._boundingBox = new Konva.Rect({
-            x: boundingBox.x,
-            y: boundingBox.y,
-            width: boundingBox.width,
-            height: boundingBox.height,
-            stroke: 'red',
-            strokeWidth: 0,
-            // strokeWidth: 1,
-            name: this._options.name + "_bounding",
-            id: createUUID()
-        });        
+        // let boundingBox = this._track.getClientRect();
+        // this._boundingBox = new Konva.Rect({
+        //     x: boundingBox.x,
+        //     y: boundingBox.y,
+        //     width: boundingBox.width,
+        //     height: boundingBox.height,
+        //     stroke: 'red',
+        //     strokeWidth: 0,
+        //     // strokeWidth: 1,
+        //     name: this._options.name + "_bounding",
+        //     id: createUUID()
+        // });        
 
         this._group = new Konva.Group({
             draggable: true,
@@ -744,7 +744,7 @@ class TrackType2 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         })        
 
         // this._group.add(this._boundingBox);
@@ -890,7 +890,7 @@ class TrackType3 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         })        
 
         // this._group.add(this._boundingBox);
@@ -1020,7 +1020,7 @@ class TrackJunctionType1 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         })        
 
         // this._group .add( this._track);
@@ -1156,7 +1156,7 @@ class TrackJunctionType2 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         })        
 
         // this._group .add( this._track);
@@ -1281,7 +1281,7 @@ class TrackCrossType1 extends Track{
         // this._group.on('dblclick dbltap', (e) => {
         this._group.on('click tap', (e) => {
             if(typeof this._onSelect == "function")
-                this._onSelect(this);
+                this._onSelect(this,e);
         })        
 
         // this._group .add( this._track);

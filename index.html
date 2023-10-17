@@ -3,7 +3,7 @@
     <head>
         <title>Konva</title>
         <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
-        <script src="lib/konva.js"></script>
+        <script src="lib/unpkg.com_konva@9.2.2_konva.min.js"></script>
         <!-- <script src="lib/konva.min.js"></script> -->
         <script src="lib/lodash.min.js"></script>
         <script src="lib/bootstrap.min.js"></script>
@@ -18,8 +18,8 @@
 
         <div id="menu" class="header menu">
             <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-3">
+                <div style="display: flex; flex-direction: row; width: 100%; gap: 2em;">
+                    <div class="" style="align-items: center; justify-content: flex-start;">
                             <div id="rotate">
                                 <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>
                                 <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
@@ -28,7 +28,7 @@
                                 <button  class="btn btn-danger" id="bDelete"><i class="bi bi-trash"></i></button>
                             </div>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="" style="align-items: center; justify-content: flex-start;">
                             <div id="create">
 
                                 <select id="addTrackType"></select><br/>
@@ -45,15 +45,20 @@
                 
                             </div>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="" style="align-items: center; justify-content: flex-start;">
                         <button class="btn btn-secondary" title="quicksave" id="bSaveStage"><i class="bi bi-cloud-arrow-down"></i></button>
                         <button class="btn btn-secondary" title="quickload" disabled="1" id="bRestoreStage"><i class="bi bi-cloud-arrow-up"></i></button>
                         <button class="btn btn-secondary" title="undo" disabled="1" id="bBack"><i class="bi bi-arrow-left-circle"></i></button>
                         <button class="btn btn-secondary" title="redo" disabled="1" id="bForward"><i class="bi bi-arrow-right-circle"></i></button>
                     </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px">
+                        <button class="btn btn-primary" id="bDownloadLogData" title="download logs" style="display: flex; align-items: baseline; gap: 1em;"><i class="bi bi-list-task"></i><span>Download logdata (events only)</span></button>
+                        <button class="btn btn-primary" id="bDownloadLogDataComplete" title="download logs" style="display: flex; align-items: baseline; gap: 1em;"><i class="bi bi-list-task"></i><span>Download logdata (complete)</span></button>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
             <div id="wrapper-inner" style="transform-origin: top left;">
                 <div id="container"></div>
