@@ -71,7 +71,7 @@ var TStage = (function () {
         tr.anchorSize(20);
 
         function hookBeforeMod(modinfo){   
-            console.log(modinfo?.type, "start", Date.now()); 
+            console.log(modinfo?.type, "start", Date.now());
             if(currentIndex<StageDataHistory.length)
                 StageDataHistory = StageDataHistory.slice(0,currentIndex);
             StageDataHistory.push(saveTrackData());
@@ -81,11 +81,7 @@ var TStage = (function () {
             if(!!document.getElementById("bForward") && !!document.getElementById("bBack")){
                 document.getElementById("bForward").setAttribute("disabled",1);
                 document.getElementById("bBack").removeAttribute("disabled");
-            }
-            postLogEvent({
-                stagedata: saveTrackData(),
-                action: modinfo
-            });            
+            }           
             currentIndex = StageDataHistory.length;
             actionStack.push(modinfo);
         }
@@ -251,7 +247,7 @@ var TStage = (function () {
                         type: "connect",
                         data: {
                             tracks: [c1.parentTrack.id, c2.parentTrack.id],
-                            connectorIds: [c1.parentTrack.connectors.indexOf(c1), c2.parentTrack.connectors.indexOf(c2)],
+                            connectorIdx: [c1.parentTrack.connectors.indexOf(c1), c2.parentTrack.connectors.indexOf(c2)],
                             timestamp: new Date().getTime()
                         }
                     }
@@ -488,6 +484,22 @@ var TStage = (function () {
             // currentMove.start = new Date().toUTCString();
             // currentMove.pos1.x = track.shape.x();
             // currentMove.pos1.y = track.shape.y();
+
+            postLogEvent({
+                stagedata: saveTrackData(),
+                action: {
+                    type: "move-start",
+                    data: {
+                        id: track.id,
+                        pos: {
+                            x: currentMove.pos1.x,
+                            y: currentMove.pos1.y,
+                        },
+                        timestamp: currentMove.start
+                    }
+                }
+            });
+
             hookBeforeMod({
                 type: "move",
                 data: _.cloneDeep(currentMove)
@@ -523,7 +535,23 @@ var TStage = (function () {
             currentMove.end = new Date().getTime();
             // currentMove.end = new Date().toUTCString();
             // currentMove.pos2.x = track.shape.x();
-            // currentMove.pos2.y = track.shape.y();            
+            // currentMove.pos2.y = track.shape.y();
+
+            postLogEvent({
+                stagedata: saveTrackData(),
+                action: {
+                    type: "move-end",
+                    data: {
+                        id: track.id,
+                        pos: {
+                            x: currentMove.pos2.x,
+                            y: currentMove.pos2.y,
+                        },
+                        timestamp: currentMove.end
+                    }
+                }
+            });
+
             hookAfterMod({
                 type: "move",
                 data: _.cloneDeep(currentMove)
