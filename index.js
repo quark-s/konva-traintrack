@@ -194,4 +194,13 @@ TStage.loadTrackData(trackData);
 	document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
 	document.getElementById("bZoomIn").setAttribute("disabled", 1);
 
+	postLogEvent({
+		action: {
+			type: "loaded",
+			data: {
+				timestamp: new Date().getTime()
+			}
+		}
+	});	
+
  })();
