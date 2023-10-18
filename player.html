@@ -20,10 +20,6 @@
 
             #actions-wrapper {
                 font-size: .7em;
-                /* max-width: 200px; */
-                margin-left: 1060px;
-                padding-top: 20px;
-                white-space: nowrap;
             }
             
             #actions-wrapper ul{
@@ -42,6 +38,17 @@
                 bottom: 10px;
                 top: auto;
             }
+
+            #visible-area{
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                border: 1px dashed green;
+                background-color: transparent;
+                width: 1024px;
+                height: 768px;
+            }
+
         </style>
 
     </head>
@@ -68,12 +75,11 @@
             </div>
         </div>          
 
-        <div style="float: left; width: 1100px;">
-            <div id="menu" class="header menu">
+            <div id="menu" class="header menu" style="width: 1100px;">
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-sm-8">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal">
+                    <div style="width: 100%; display: flex; flex-direction: row; width: 100%; gap: 2em; align-items:stretch; justify-content: flex-start;">
+                        <div class="" id="rotate" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em;">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal" style="white-space: nowrap; min-width: 200px;">
                                 Load stage history
                             </button>
                             <!--
@@ -87,7 +93,7 @@
                             <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bNext"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="" id="rotate" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em; flex-grow: 1;">
                             <div class="slidecontainer">
                                 <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
                             </div>
@@ -96,18 +102,19 @@
                 </div>
             </div>
 
-            <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
-                <div id="wrapper-inner" style="transform-origin: top left;">
-                    <div id="container"></div>
+            <div style="display: flex; flex-direction: row; gap: 2em;">
+                <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden; position: relative;">
+                    <div id="visible-area"></div>
+                    <div id="wrapper-inner" style="transform-origin: top left;">
+                        <div id="container"></div>
+                    </div>
+                </div>
+                <div id="actions-wrapper">
+                    <div id="actions">
+                        <traintrack-log id="log"></traintrack-log>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div id="actions-wrapper">
-            <div id="actions">
-                <traintrack-log id="log"></traintrack-log>
-            </div>
-        </div>
         
     </body>
 

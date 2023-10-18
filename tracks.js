@@ -306,6 +306,14 @@ class Track{
         if(typeof callback == "function")
             this._onSelect = callback;
     }
+
+    get draggable(){
+        return this._group.draggable();
+    }
+
+    set draggable(d){
+        return this._group.draggable(Boolean(d));
+    }
 }
 
 

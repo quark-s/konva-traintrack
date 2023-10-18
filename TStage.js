@@ -27,20 +27,20 @@ var TStage = (function () {
         let scale = 0.85;
         let boundaries = {
             0.85: {
-                x: 1043,
-                y: 745
+                x: 1150,
+                y: 860
             },
             0.75: {
-                x: 1177,
-                y: 845
+                x: 1280,
+                y: 960
             },
             0.65: {
-                x: 1360,
-                y: 975
+                x: 1420,
+                y: 1024
             },
             0.55: {
-                x: 1610,
-                y: 1150
+                x: 1760,
+                y: 1320
             },
         }
 
@@ -242,7 +242,7 @@ var TStage = (function () {
 
         function logConnected(c1,c2){
             if(!lastConnected.includes(c1) || !lastConnected.includes(c2)){
-                postLogEvent({
+                postLogEventProxy({
                     action: {
                         type: "connect",
                         data: {
@@ -258,7 +258,7 @@ var TStage = (function () {
 
         function logDisconnected(c1,c2){            
             if(lastConnected.includes(c1) && lastConnected.includes(c2)){
-                postLogEvent({
+                postLogEventProxy({
                     action: {
                         type: "disconnect",
                         data: {
@@ -274,7 +274,7 @@ var TStage = (function () {
 
         function logRejected(c1,c2){
             if(!lastRejected.includes(c1) || !lastRejected.includes(c2)){
-                postLogEvent({
+                postLogEventProxy({
                     action: {
                         type: "missmatch",
                         data: {
@@ -289,7 +289,7 @@ var TStage = (function () {
         }
 
         function logTrackSelected(track,e){
-            postLogEvent({
+            postLogEventProxy({
                 action: {
                     type: "select-track",
                     data: {
@@ -300,6 +300,10 @@ var TStage = (function () {
             });
         }
 
+        function postLogEventProxy(data){
+            if(!replayMode)
+                postLogEvent(data);
+        }
 
         function rejectTracks(c1, c2){
             console.log("rejectTracks");
@@ -392,11 +396,16 @@ var TStage = (function () {
                 // let tmp = new window[d.type](d.pos, d.width, d.height);
                 if(!!d.id && replayMode)
                     tmp.id = d.id;
+
                 if(!replayMode){
                     tmp.shape.on('dragstart', dragstart);
                     tmp.shape.on('dragend', dragend);
                     tmp.shape.on('dragmove', dragmove);
                 }
+                else{
+                    tmp.draggable = false;
+                }
+
                 tmp.onSelect = cbTrackSelected;
 //                tmp.onSelect = cbTrackSelected;
 
@@ -485,7 +494,7 @@ var TStage = (function () {
             // currentMove.pos1.x = track.shape.x();
             // currentMove.pos1.y = track.shape.y();
 
-            postLogEvent({
+            postLogEventProxy({
                 stagedata: saveTrackData(),
                 action: {
                     type: "move-start",
@@ -537,7 +546,7 @@ var TStage = (function () {
             // currentMove.pos2.x = track.shape.x();
             // currentMove.pos2.y = track.shape.y();
 
-            postLogEvent({
+            postLogEventProxy({
                 stagedata: saveTrackData(),
                 action: {
                     type: "move-end",
@@ -659,6 +668,7 @@ var TStage = (function () {
             },
             "getCurrentIndex": function(){return currentIndex},
             "getSavedTrackData": function(){return savedTrackData},
+            "getCurrentTrackData": function(){return saveTrackData()},
             "getStageDataHistory": function(){return StageDataHistory},
         }
 })();

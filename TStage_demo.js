@@ -655,6 +655,7 @@ var TStage = (function () {
         },
         "getCurrentIndex": function(){return currentIndex},
         "getSavedTrackData": function(){return savedTrackData},
+        "getCurrentTrackData": function(){return saveTrackData()},
         "getStageDataHistory": function(){return StageDataHistory},
     }
 })();

@@ -44,6 +44,7 @@ TStage.loadTrackData(trackData);
                     selectedTrack.rotation = _rotation;
                     TStage.updateInfo(selectedTrack);
 					logdata.data.end = new Date().getTime();
+					logdata.data.timestamp = logdata.data.end;
                     TStage.hookAfterMod(logdata);
 					if (_rotation>0 && (_rotation-360)>0)
 						_rotation-=360;
@@ -51,6 +52,11 @@ TStage.loadTrackData(trackData);
 						_rotation+=360;
 					rotmap.set(selectedTrack.shape.id(), _rotation);
 					selectedTrack.shape.rotation(_rotation);
+
+					postLogEvent({
+						stagedata: TStage.getCurrentTrackData(),
+						action: logdata
+					});					
 					// console.log(rotmap, rot, _crotation, _rotation);
                }
             });
@@ -195,6 +201,7 @@ TStage.loadTrackData(trackData);
 	document.getElementById("bZoomIn").setAttribute("disabled", 1);
 
 	postLogEvent({
+		stagedata: TStage.getCurrentTrackData(),
 		action: {
 			type: "loaded",
 			data: {

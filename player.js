@@ -97,7 +97,23 @@ class TraintrackLog extends LitElement {
             slider.val(0);
             let playInterval = null;
             let relativeTimeDiff = 0;
-            
+
+            const zoomMap = new Map();
+            const zoomMax = 0.85;
+            const zoomMin = 0.55;
+            const zoomStep = 0.1;
+            const baseWidth = 1024;
+            const baseHeight = 768;
+            const zoomInitial = zoomMax;
+            const effectiveWidth = Math.round(baseWidth/zoomMin);
+
+            let z = zoomMin;
+            while (z<=zoomMax) {
+                let factor = Math.round(baseWidth/z) / effectiveWidth;
+                zoomMap.set(z, factor);
+                z+=zoomStep;
+            }
+
             TStage.toggleReplayMode();
             
             const input = document.querySelector('#history-upload');
@@ -116,7 +132,29 @@ class TraintrackLog extends LitElement {
                 reader.readAsText(file);
                 console.log(file);
             });
+
+            function scaleVisibleArea(scale){
+                let _node = document.getElementById("visible-area");
+                if(!!_node && scale && zoomMap.has(scale)){
+                    _node.style.width = Math.round(zoomMap.get(scale) * baseWidth)+"px";
+                    _node.style.height = Math.round(zoomMap.get(scale) * baseHeight)+"px";
+                }                
+            }
             
+            function loadDataProxy(index) {
+                //resize visible area
+                let ret = TStage.loadTrackData(stageHistory[index]);
+                if(ret && actions[index]){
+                    $('#log')[0].actions = actions.slice(0,parseInt(index)+1);
+                    if(actions[index].type == "zoom-in" || actions[index].type == "zoom-out"){
+                        let _action = actions[index];
+                        if(_action && _action?.data?.scale)
+                            scaleVisibleArea(_action?.data?.scale);
+                    }
+                }
+                return ret;
+            }
+
             function loadStageHistory(event, json){
                 window.clearInterval(playInterval);
                 try {
@@ -144,8 +182,8 @@ class TraintrackLog extends LitElement {
                             element.action.relativeTime -= relativeTimeDiff;
                         actions.push(element?.action);
                     });
-                    if(TStage.loadTrackData(stageHistory[0])){
-                        $('#log')[0].actions = actions.slice(0,1);
+                    if(loadDataProxy(0)){
+                        // $('#log')[0].actions = actions.slice(0,1);
                         // stageHistory = data;
                         $('#bNext').removeAttr("disabled");
                         $('#bPlay').removeAttr("disabled");
@@ -172,8 +210,8 @@ class TraintrackLog extends LitElement {
             $('#bNext').on('click', function(){
                 
                 if(currentIndex<stageHistory.length-1){
-                    TStage.loadTrackData(stageHistory[++currentIndex]);
-                    $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                    loadDataProxy(++currentIndex);
+                    // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                     $('#bPrev').removeAttr("disabled");
                 }
                 slider.val(currentIndex);
@@ -184,8 +222,8 @@ class TraintrackLog extends LitElement {
             $('#bPrev').on('click', function(){
                 
                 if(currentIndex>0){
-                    TStage.loadTrackData(stageHistory[--currentIndex]);
-                    $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                    loadDataProxy(--currentIndex);
+                    // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                     $('#bNext').removeAttr("disabled");
                 }
                 slider.val(currentIndex);
@@ -199,8 +237,8 @@ class TraintrackLog extends LitElement {
                 $('#bPause').removeAttr("disabled");
                 playInterval = window.setInterval(e => {
                     if(currentIndex<stageHistory.length-1){
-                        TStage.loadTrackData(stageHistory[++currentIndex]);
-                        $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                        loadDataProxy(++currentIndex);
+                        // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                         slider.val(currentIndex);
                     }
                     else{
@@ -222,8 +260,7 @@ class TraintrackLog extends LitElement {
             $('#playerSlider').on("input", function(){
                 window.clearInterval(playInterval);
                 if(!!stageHistory[this.value]){
-                    TStage.loadTrackData(stageHistory[this.value]);
-                    $('#log')[0].actions = actions.slice(0,parseInt(this.value)+1);
+                    loadDataProxy(this.value);                    
                     currentIndex = this.value;
                 }
 
@@ -241,7 +278,8 @@ class TraintrackLog extends LitElement {
                 console.log(this.value);
             });
 
-            let scale = 0.65;
+            let scale = 0.55;
+            scaleVisibleArea(zoomInitial);
             document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
     })()
 };
