@@ -151,6 +151,9 @@ class TraintrackLog extends LitElement {
                         if(_action && _action?.data?.scale)
                             scaleVisibleArea(_action?.data?.scale);
                     }
+                    else if(actions[index].type == "loaded"){
+                        scaleVisibleArea(zoomInitial);
+                    }
                 }
                 return ret;
             }
@@ -279,7 +282,7 @@ class TraintrackLog extends LitElement {
             });
 
             let scale = 0.55;
-            scaleVisibleArea(zoomInitial);
+            
             document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
     })()
 };
