@@ -1,7 +1,7 @@
 import KonvaConfig from './conf.js';
 import TStage from './lib/TStage.js';
 // import TStage from './lib/TStage_demo.mjs';
-import {postLogEvent, userDefIdPath} from './lib/log.js';
+import {postLogEvent, userDefIdPath, LogHistory} from './lib/log.js';
 import trackDataAll from './shapes/all_shuffled.js'
 
 let trackData = [];
