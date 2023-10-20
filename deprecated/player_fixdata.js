@@ -1,4 +1,4 @@
-import {LitElement, html, css, templateContent} from "./lib/lit-all.min.js";
+import {LitElement, html, css, templateContent} from "../lib/lit-all.min.js";
 
 class TraintrackLog extends LitElement {
 

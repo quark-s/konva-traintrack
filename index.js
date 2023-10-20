@@ -1,3 +1,23 @@
+import KonvaConfig from './conf.js';
+import TStage from './lib/TStage.js';
+// import TStage from './lib/TStage_demo.mjs';
+import {postLogEvent, userDefIdPath} from './lib/log.js';
+import trackDataAll from './shapes/all_shuffled.js'
+
+let trackData = [];
+if(trackDataAll.length>0)
+	trackData = trackDataAll[0];
+
+if(!!userDefIdPath){
+	try {
+		let match = userDefIdPath.match(/id=task([0-9])+$/);
+		let idx = parseInt(match[1])-1;
+		if(!!trackDataAll[idx])
+			trackData = trackDataAll[idx];
+	} catch (error) {
+		console.error(error);
+	}
+}
 
 let trackTypes = [
     "TrackType1",
