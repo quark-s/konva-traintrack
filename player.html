@@ -4,12 +4,11 @@
         <title>Konva</title>
         <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
         
-        <script src="lib/konva.min.js"></script>
+        <script src="lib/unpkg.com_konva@9.2.2_konva.min.js"></script>
         <script src="lib/lodash.min.js"></script>
         <script src="lib/bootstrap.min.js"></script>
         <script src="lib/jquery.slim.min.js"></script>
-
-        <script type="module"  src="player.js"></script>
+        <script src="lib/moment.min.js"></script>                
 
         <link rel="stylesheet" href="css/bootstrap-icons.css">
         <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -19,10 +18,6 @@
 
             #actions-wrapper {
                 font-size: .7em;
-                /* max-width: 200px; */
-                margin-left: 1060px;
-                padding-top: 20px;
-                white-space: nowrap;
             }
             
             #actions-wrapper ul{
@@ -41,6 +36,17 @@
                 bottom: 10px;
                 top: auto;
             }
+
+            #visible-area{
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                border: 2px dashed green;
+                background-color: transparent;
+                width: 1024px;
+                height: 768px;
+            }
+
         </style>
 
     </head>
@@ -67,24 +73,25 @@
             </div>
         </div>          
 
-        <div style="float: left; width: 1100px;">
-            <div id="menu" class="header menu">
+            <div id="menu" class="header menu" style="width: 1100px;">
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-sm-7">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal">
+                    <div style="width: 100%; display: flex; flex-direction: row; width: 100%; gap: 2em; align-items:stretch; justify-content: flex-start;">
+                        <div class="" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em;">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pasteModal" style="white-space: nowrap; min-width: 200px;">
                                 Load stage history
                             </button>
+                            <!--
                             <button type="button" id="btn-history-upload" class="btn btn-primary">
                                 Upload history from file
                             </button>
-                            <input hidden type="file" id="history-upload">
+                            -->
+                            <input type="file" id="history-upload">
                             <button disabled="1" class="btn btn-secondary" id="bPrev"><i class="bi bi-skip-start-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPause"><i class="bi bi-pause-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bNext"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="" id="rotate" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em; flex-grow: 1;">
                             <div class="slidecontainer">
                                 <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
                             </div>
@@ -93,29 +100,22 @@
                 </div>
             </div>
 
-            <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
-                <div id="wrapper-inner" style="transform-origin: top left;">
-                    <div id="container"></div>
+            <div style="display: flex; flex-direction: row; gap: 2em;">
+                <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden; position: relative;">
+                    <div id="visible-area"></div>
+                    <div id="wrapper-inner" style="transform-origin: top left;">
+                        <div id="container"></div>
+                    </div>
+                </div>
+                <div id="actions-wrapper">
+                    <div id="actions">
+                        <traintrack-log id="log"></traintrack-log>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div id="actions-wrapper">
-            <div id="actions">
-                <traintrack-log id="log"></traintrack-log>
-            </div>
-        </div>
         
     </body>
 
-    <script src="tracks.js"></script>
-    <script src="trackdata.js"></script>
-    <script src="TStage.js"></script>    
-
-    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-    <!-- <script src="./node_modules/jquery-slim/dist/jquery.slim.min.js"></script> -->
-    <!-- <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+    <script type="module"  src="player.js"></script>
 
 </html>

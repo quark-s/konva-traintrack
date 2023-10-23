@@ -1,3 +1,23 @@
+import KonvaConfig from './conf.js';
+import TStage from './lib/TStage.js';
+// import TStage from './lib/TStage_demo.mjs';
+import {postLogEvent, userDefIdPath, LogHistory} from './lib/log.js';
+import trackDataAll from './shapes/all_shuffled.js'
+
+let trackData = [];
+if(trackDataAll.length>0)
+	trackData = trackDataAll[0];
+
+if(!!userDefIdPath){
+	try {
+		let match = userDefIdPath.match(/id=task([0-9])+$/);
+		let idx = parseInt(match[1])-1;
+		if(!!trackDataAll[idx])
+			trackData = trackDataAll[idx];
+	} catch (error) {
+		console.error(error);
+	}
+}
 
 let trackTypes = [
     "TrackType1",
@@ -44,6 +64,7 @@ TStage.loadTrackData(trackData);
                     selectedTrack.rotation = _rotation;
                     TStage.updateInfo(selectedTrack);
 					logdata.data.end = new Date().getTime();
+					logdata.data.timestamp = logdata.data.end;
                     TStage.hookAfterMod(logdata);
 					if (_rotation>0 && (_rotation-360)>0)
 						_rotation-=360;
@@ -51,6 +72,11 @@ TStage.loadTrackData(trackData);
 						_rotation+=360;
 					rotmap.set(selectedTrack.shape.id(), _rotation);
 					selectedTrack.shape.rotation(_rotation);
+
+					postLogEvent({
+						stagedata: TStage.getCurrentTrackData(),
+						action: logdata
+					});					
 					// console.log(rotmap, rot, _crotation, _rotation);
                }
             });
@@ -63,6 +89,18 @@ TStage.loadTrackData(trackData);
     document.getElementById("bRotateLeft").onclick = function(e) {rotate(0,this);}
     if(!!document.getElementById("bDelete")){
 		document.getElementById("bDelete").onclick = function(e) {if(!!TStage.getSelectedTrack()) TStage.removeTrack(TStage.getSelectedTrack());}
+	}
+	
+	if(!!document.getElementById("bDownloadLogData")){
+		document.getElementById("bDownloadLogData").onclick = function(e) {
+			LogHistory.downloadLogs();
+		}
+	}
+
+	if(!!document.getElementById("bDownloadLogDataComplete")){
+		document.getElementById("bDownloadLogDataComplete").onclick = function(e) {
+			LogHistory.downloadLogsComplete();
+		}
 	}
 	
 	if(!!document.getElementById("bSaveStage")){
@@ -181,5 +219,15 @@ TStage.loadTrackData(trackData);
 	let scale = 0.85;
 	document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
 	document.getElementById("bZoomIn").setAttribute("disabled", 1);
+
+	postLogEvent({
+		stagedata: TStage.getCurrentTrackData(),
+		action: {
+			type: "loaded",
+			data: {
+				timestamp: new Date().getTime()
+			}
+		}
+	});	
 
  })();

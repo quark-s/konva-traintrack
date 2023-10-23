@@ -1,4 +1,5 @@
 import {LitElement, html, css, templateContent} from "./lib/lit-all.min.js";
+import TStage from './lib/TStage.js';
 
 class TraintrackLog extends LitElement {
 
@@ -34,21 +35,27 @@ class TraintrackLog extends LitElement {
     }
 
     renderActionDetails(data){
+        if(!data || !Object.keys(data).length)
+            return '';
         return html`
             ${Object.keys(data).map(e => {
                 return html`
                     <strong>${e}: </strong>${JSON.stringify(data[e])}<br/>
                 `
             })}
-        `
+        `;
     }
 
     renderAction(action, i){
         let _class = i==this.actions.slice(-this.max).length-1 ? "last" : "";
+        let _relativeTime = moment.duration(action?.relativeTime);
+        let _timeStamp = action?.timeStamp ? action.timeStamp : (action?.data?.timestamp ? action.data.timestamp : 0);
         return html`
             <div class="${_class}">
                 <div><strong>type: </strong> ${action?.type}</div>
-                <div><strong>relative time: </strong> ${action?.relativeTime}</div>
+                <div><strong>relative time (hh:mm:ss.ms): </strong> ${_relativeTime.hours().toString().padStart(2, "0")}:${_relativeTime.minutes().toString().padStart(2, "0")}:${_relativeTime.seconds().toString().padStart(2, "0")}.${_relativeTime.milliseconds()}</div>
+                <div><strong>relative time (seoconds): </strong> ${action?.relativeTime/1000} s</div>
+                <div><strong>timestamp: </strong> ${_timeStamp ? new Date(_timeStamp).toLocaleString('de-DE', {timeZone: 'CET'}) : 'n/a'}</div>
                 <div><strong><a data-bs-toggle="collapse" href="#collapse-${i}" role="button" aria-expanded="false" aria-controls="collapse-${i}">details</a></strong></div>
                 <div class="collapse" id="collapse-${i}">${this.renderActionDetails(action.data)}</div>
             </div>
@@ -63,7 +70,7 @@ class TraintrackLog extends LitElement {
         if(TStage){
             try {
                 let _actions = this.actions.slice(-this.max);
-                TStage.selectTrack(_actions[_actions.length-1].data.id);
+                TStage.selectTrack(_actions[_actions.length-1]?.data?.id);
             } catch (error) {
                 console.error(error);   
             }
@@ -91,7 +98,24 @@ class TraintrackLog extends LitElement {
             let slider = $('#playerSlider');
             slider.val(0);
             let playInterval = null;
-            
+            let relativeTimeDiff = 0;
+
+            const zoomMap = new Map();
+            const zoomMax = 0.85;
+            const zoomMin = 0.55;
+            const zoomStep = 0.1;
+            const baseWidth = 1024;
+            const baseHeight = 768;
+            const zoomInitial = zoomMax;
+            const effectiveWidth = Math.round(baseWidth/zoomMin);
+
+            let z = zoomMin;
+            while (z<=zoomMax) {
+                let factor = Math.round(baseWidth/z) / effectiveWidth;
+                zoomMap.set(z, factor);
+                z+=zoomStep;
+            }
+
             TStage.toggleReplayMode();
             
             const input = document.querySelector('#history-upload');
@@ -110,7 +134,32 @@ class TraintrackLog extends LitElement {
                 reader.readAsText(file);
                 console.log(file);
             });
+
+            function scaleVisibleArea(scale){
+                let _node = document.getElementById("visible-area");
+                if(!!_node && scale && zoomMap.has(scale)){
+                    _node.style.width = Math.round(zoomMap.get(scale) * baseWidth)+"px";
+                    _node.style.height = Math.round(zoomMap.get(scale) * baseHeight)+"px";
+                }                
+            }
             
+            function loadDataProxy(index) {
+                //resize visible area
+                let ret = TStage.loadTrackData(stageHistory[index]);
+                if(ret && actions[index]){
+                    $('#log')[0].actions = actions.slice(0,parseInt(index)+1);
+                    if(actions[index].type == "zoom-in" || actions[index].type == "zoom-out"){
+                        let _action = actions[index];
+                        if(_action && _action?.data?.scale)
+                            scaleVisibleArea(_action?.data?.scale);
+                    }
+                    else if(actions[index].type == "loaded"){
+                        scaleVisibleArea(zoomInitial);
+                    }
+                }
+                return ret;
+            }
+
             function loadStageHistory(event, json){
                 window.clearInterval(playInterval);
                 try {
@@ -118,6 +167,8 @@ class TraintrackLog extends LitElement {
                     actions = [];        
                     let data = json ?? JSON.parse($('#stageData').val());        
                     let stagedata = null;
+                    data.sort((a,b) => a.relativeTime - b.relativeTime);
+                    relativeTimeDiff = data[0].relativeTime;
                     slider.val(0);
                     currentIndex = 0;
                     let i = 0;
@@ -127,15 +178,17 @@ class TraintrackLog extends LitElement {
                             stagedata = data[i].stagedata;
                         i++;
                     } while (!stagedata && i < data.length-1);
-                
+                    
                     data.forEach(element => {
                         if(!!element.stagedata && Object.keys(element.stagedata).length>0)
                             stagedata = element.stagedata;            
                         stageHistory.push(stagedata);
+                        if(element?.action?.relativeTime)
+                            element.action.relativeTime -= relativeTimeDiff;
                         actions.push(element?.action);
                     });
-                    if(TStage.loadTrackData(stageHistory[0])){
-                        $('#log')[0].actions = actions.slice(0,1);
+                    if(loadDataProxy(0)){
+                        // $('#log')[0].actions = actions.slice(0,1);
                         // stageHistory = data;
                         $('#bNext').removeAttr("disabled");
                         $('#bPlay').removeAttr("disabled");
@@ -162,8 +215,8 @@ class TraintrackLog extends LitElement {
             $('#bNext').on('click', function(){
                 
                 if(currentIndex<stageHistory.length-1){
-                    TStage.loadTrackData(stageHistory[++currentIndex]);
-                    $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                    loadDataProxy(++currentIndex);
+                    // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                     $('#bPrev').removeAttr("disabled");
                 }
                 slider.val(currentIndex);
@@ -174,8 +227,8 @@ class TraintrackLog extends LitElement {
             $('#bPrev').on('click', function(){
                 
                 if(currentIndex>0){
-                    TStage.loadTrackData(stageHistory[--currentIndex]);
-                    $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                    loadDataProxy(--currentIndex);
+                    // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                     $('#bNext').removeAttr("disabled");
                 }
                 slider.val(currentIndex);
@@ -189,8 +242,8 @@ class TraintrackLog extends LitElement {
                 $('#bPause').removeAttr("disabled");
                 playInterval = window.setInterval(e => {
                     if(currentIndex<stageHistory.length-1){
-                        TStage.loadTrackData(stageHistory[++currentIndex]);
-                        $('#log')[0].actions = actions.slice(0,currentIndex+1);
+                        loadDataProxy(++currentIndex);
+                        // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                         slider.val(currentIndex);
                     }
                     else{
@@ -212,8 +265,7 @@ class TraintrackLog extends LitElement {
             $('#playerSlider').on("input", function(){
                 window.clearInterval(playInterval);
                 if(!!stageHistory[this.value]){
-                    TStage.loadTrackData(stageHistory[this.value]);
-                    $('#log')[0].actions = actions.slice(0,parseInt(this.value)+1);
+                    loadDataProxy(this.value);                    
                     currentIndex = this.value;
                 }
 
@@ -231,7 +283,8 @@ class TraintrackLog extends LitElement {
                 console.log(this.value);
             });
 
-            let scale = 0.65;
+            let scale = 0.55;
+            
             document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
     })()
 };

@@ -1,4 +1,4 @@
-var trackData = [
+export default [
     {
         "type": "TrackJunctionType1",
         "pos": {

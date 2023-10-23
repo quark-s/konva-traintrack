@@ -1,4 +1,4 @@
-var trackData = [
+export default [
     {
         "id": "59a9a496-1bd8-47d5-b6d0-11e1978b75c8",
         "type": "TrackType2",
