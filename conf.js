@@ -1,5 +1,5 @@
 
 
 export default {
-    assessment: true
+    assessment: false
 }

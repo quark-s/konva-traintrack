@@ -5,10 +5,47 @@
         <script src="lib/unpkg.com_konva@9.2.2_konva.min.js"></script>
         <script src="lib/lodash.min.js"></script>
         <script src="lib/bootstrap.min.js"></script>
+        <script src="lib/moment.min.js"></script>
         <link rel="stylesheet" href="css/bootstrap-icons.css">
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/style.css">
     </head>
+
+    <style>
+
+        #actions-wrapper {
+            font-size: .7em;
+        }
+        
+        #actions-wrapper ul{
+            list-style: none;
+        }
+
+        #actions-wrapper ul li{
+            padding-bottom: 1em;
+        }
+
+        #actions-wrapper ul li div.last{
+            background-color: #b6eddb;
+        }
+
+        body #info{
+            bottom: 10px;
+            top: auto;
+        }
+
+        #visible-area{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            border: 2px dashed green;
+            background-color: transparent;
+            width: 1024px;
+            height: 768px;
+        }
+
+    </style>
+
     <body>
         
         <div id="info">nothing selected</div>
@@ -57,8 +94,10 @@
                     <div id="container"></div>
                 </div>
             </div>
-            <div id="log">
-
+            <div id="actions-wrapper">
+                <div id="actions">
+                    <traintrack-replay-log id="log"></traintrack-log>
+                </div>
             </div>
         </div>
         

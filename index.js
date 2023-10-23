@@ -1,8 +1,10 @@
 import KonvaConfig from './conf.js';
 import TStage from './lib/TStage.js';
+import TraintrackReplayLog from './lib/components/replayLog.js';
 // import TStage from './lib/TStage_demo.mjs';
 import {postLogEvent, userDefIdPath, LogHistory} from './lib/log.js';
 import trackDataAll from './shapes/all_shuffled.js'
+
 
 let trackData = [];
 if(trackDataAll.length>0)
@@ -30,6 +32,7 @@ let trackTypes = [
 
 TStage.loadTrackData(trackData);
 // TStage.zoom(1.5);
+
 
 (function() {
 
@@ -219,6 +222,15 @@ TStage.loadTrackData(trackData);
 	let scale = 0.85;
 	document.querySelector('#wrapper-inner').style.transform = "scale(" + scale + ")";
 	document.getElementById("bZoomIn").setAttribute("disabled", 1);
+	
+	if(document.getElementById('log')){
+		LogHistory.setOnAfterPush(d => {
+			// console.log(d);
+			document.getElementById('log').actions = LogHistory.getLogs(false, false).slice(0).map(a => a.action);
+			// document.getElementById('log').setAttribute("actions", LogHistory.getLogs(false).slice(0));
+			// $('log')[0].actions= LogHistory.getLogs(false).slice(0);
+		})
+	}
 
 	postLogEvent({
 		stagedata: TStage.getCurrentTrackData(),
@@ -229,5 +241,6 @@ TStage.loadTrackData(trackData);
 			}
 		}
 	});	
+
 
  })();
