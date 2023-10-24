@@ -45,6 +45,7 @@ TStage.loadTrackData(trackData);
             type: "rotate",
             data: {
 				id: selectedTrack.id,
+				labels: [selectedTrack.label],
 				rotation: rot,
 				start: new Date().getTime(),
 				end: null
