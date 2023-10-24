@@ -225,8 +225,11 @@ TStage.loadTrackData(trackData);
 	
 	if(document.getElementById('log')){
 		LogHistory.setOnAfterPush(d => {
+			document.getElementById('log').actions = LogHistory
+			.getLogs(false, false)
+			.slice(0)
+			.map(a => a.action);
 			// console.log(d);
-			document.getElementById('log').actions = LogHistory.getLogs(false, false).slice(0).map(a => a.action);
 			// document.getElementById('log').setAttribute("actions", LogHistory.getLogs(false).slice(0));
 			// $('log')[0].actions= LogHistory.getLogs(false).slice(0);
 		})
