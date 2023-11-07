@@ -10,7 +10,6 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
             let actions = [];
             let slider = $('#playerSlider');
             slider.val(0);
-            let playInterval = null;
             let relativeTimeDiff = 0;
 
             const zoomMap = new Map();
@@ -28,6 +27,10 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                 zoomMap.set(z, factor);
                 z+=zoomStep;
             }
+
+            let playInterval = null;
+            let playTimeoutRealtime = null;
+            let playIntervalRealtimeInfo = null;
 
             TStage.toggleReplayMode();
             $('#log')[0].stage = TStage;
@@ -74,6 +77,22 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                 return ret;
             }
 
+            function setNextActionInfo(show){
+                window.clearInterval(playIntervalRealtimeInfo);
+                if(show){
+                    $('#infoNextAction')[0].style.display = "inline";
+                    let delay = actions[currentIndex+1]["relativeTime"] - actions[currentIndex]["relativeTime"];
+                    let targetTime = Date.now() + delay;
+                    playIntervalRealtimeInfo = window.setInterval(e => {
+                        let remaining = Math.round((targetTime - Date.now())/1000);
+                        $("#infoNextActionSeconds").html(`<span>${remaining}</span>`);
+                    }, 1000);
+                }
+                else{
+                    $('#infoNextAction')[0].style.display = "none";                    
+                }
+            }
+
             function loadStageHistory(event, json){
                 window.clearInterval(playInterval);
                 try {
@@ -104,8 +123,11 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                     if(loadDataProxy(0)){
                         // $('#log')[0].actions = actions.slice(0,1);
                         // stageHistory = data;
-                        $('#bNext').removeAttr("disabled");
-                        $('#bPlay').removeAttr("disabled");
+                        if(stageHistory.length-1>0){
+                            $('#bNext').removeAttr("disabled");
+                            $('#bPlay').removeAttr("disabled");
+                            $('#bPlayRealtime').removeAttr("disabled");
+                        }
                         $('#playerSlider').attr("min", 0);
                         $('#playerSlider').attr("max", stageHistory.length-1);
                         $('#playerSlider').attr("value", 0);
@@ -144,6 +166,8 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                     loadDataProxy(--currentIndex);
                     // $('#log')[0].actions = actions.slice(0,currentIndex+1);
                     $('#bNext').removeAttr("disabled");
+                    $('#bPlayRealtime').removeAttr("disabled");
+                    $('#bPlay').removeAttr("disabled");
                 }
                 slider.val(currentIndex);
                 if(currentIndex == 0)
@@ -153,6 +177,8 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
             $('#bPlay').on('click', function(){
                 $('#bPrev').attr("disabled", 1);
                 $('#bNext').attr("disabled", 1);
+                $('#bPlayRealtime').attr("disabled", 1);
+                $('#bPlay').attr("disabled", 1);
                 $('#bPause').removeAttr("disabled");
                 playInterval = window.setInterval(e => {
                     if(currentIndex<stageHistory.length-1){
@@ -167,17 +193,69 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                 }, 2000);
             });
 
+
+
+            let playRealtime = () => {
+
+                if(currentIndex>=stageHistory.length-1){
+                    playTimeoutRealtime=null;
+                    $('#bPrev').removeAttr("disabled");
+                    $('#bPause').attr("disabled", 1);
+                    setNextActionInfo(false);
+                    return;
+                }
+
+                $('#bNext').attr("disabled", 1);
+                $('#bPrev').attr("disabled", 1);
+                $('#bPlay').attr("disabled", 1);
+                $('#bPlayRealtime').attr("disabled", 1);
+                $('#bPause').removeAttr("disabled");
+                setNextActionInfo(true);
+
+                let delay = actions[currentIndex+1]["relativeTime"] - actions[currentIndex]["relativeTime"];
+
+                playTimeoutRealtime = window.setTimeout(e => {
+                    loadDataProxy(++currentIndex);
+                    slider.val(currentIndex);
+                    console.log(delay);
+                    if(currentIndex<=stageHistory.length-1 && playTimeoutRealtime){
+                        playRealtime();
+                    } 
+                    else
+                    {
+                        playTimeoutRealtime=null;
+                        $('#bPrev').removeAttr("disabled");    
+                    }
+                }, delay);
+            }
+
+            $('#bPlayRealtime').on('click', function(){
+                playRealtime();
+            });
+
             $('#bPause').on('click', function(){
+
                 window.clearInterval(playInterval);
+                window.clearTimeout(playTimeoutRealtime);
+                playTimeoutRealtime = null;
+                setNextActionInfo(false);
+
                 $('#bPause').attr("disabled", 1);
                 if(currentIndex>0)
                     $('#bPrev').removeAttr("disabled");
-                if(currentIndex<stageHistory.length-1)
+                if(currentIndex<stageHistory.length-1){
                     $('#bNext').removeAttr("disabled");
+                    $('#bPlayRealtime').removeAttr("disabled");
+                    $('#bPlay').removeAttr("disabled");
+                }
             });
 
             $('#playerSlider').on("input", function(){
                 window.clearInterval(playInterval);
+                window.clearInterval(playIntervalRealtimeInfo);                
+                setNextActionInfo(false);
+
+                playTimeoutRealtime = null;                
                 if(!!stageHistory[this.value]){
                     loadDataProxy(this.value);                    
                     currentIndex = this.value;

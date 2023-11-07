@@ -88,12 +88,18 @@
                             <input type="file" id="history-upload">
                             <button disabled="1" class="btn btn-secondary" id="bPrev"><i class="bi bi-skip-start-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bPause"><i class="bi bi-pause-fill"></i></button>
-                            <button disabled="1" class="btn btn-secondary" id="bPlay"><i class="bi bi-play-fill"></i></button>
+                            <button disabled="1" class="btn btn-secondary" title="Abspielen" id="bPlay"><i class="bi bi-play-fill"></i></button>
+                            <button disabled="1" class="btn btn-secondary" title="Abspielen (Echtzeit)" id="bPlayRealtime"><i class="bi bi-collection-play-fill"></i></button>
                             <button disabled="1" class="btn btn-secondary" id="bNext"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
                         <div class="" id="rotate" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em; flex-grow: 1;">
-                            <div class="slidecontainer">
-                                <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
+                            <div style="display: flex; flex-direction: column; ">
+                                <div class="slidecontainer">
+                                    <input type="range" min="1" max="100" value="50" class="slider" id="playerSlider">
+                                </div>
+                                <div id="infoNextAction" style="font-size: small; font-weight: bold; display: none;">
+                                    Nächste Aktion in: <span id="infoNextActionSeconds"></span> Sekunden;
+                                </div>
                             </div>
                         </div>
                     </div>
