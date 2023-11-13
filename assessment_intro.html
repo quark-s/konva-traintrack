@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Konva</title>
+        <script src="lib/unpkg.com_konva@9.2.2_konva.min.js"></script>
+        <script src="lib/lodash.min.js"></script>
+        <script src="lib/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="css/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        
+        <div id="info" style="display: none;">nothing selected</div>
+
+        <div id="menu" class="header menu">
+            <div class="container-fluid">
+                <div style="display: flex; flex-direction: row; width: 100%; gap: 2em; align-items:stretch; justify-content: flex-start;">
+                    <div class="" id="rotate" style="display: flex; align-items: flex-start; justify-content: flex-start; gap: .25em;">
+                        <button class="btn btn-primary" id="bRotateRight"><i class="bi bi-arrow-clockwise"></i></button>
+                        <button  class="btn btn-primary" id="bRotateLeft"><i class="bi bi-arrow-counterclockwise"></i></button>
+                        <button class="btn btn-primary" id="bZoomIn"><i class="bi bi-zoom-in"></i></button>
+                        <button  class="btn btn-primary" id="bZoomOut"><i class="bi bi-zoom-out"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: row; gap: 2em;">
+            <div id="wrapper-outer" style="width: 1024px; height: 768px; overflow:hidden;">
+                <div id="wrapper-inner" style="transform-origin: top left;">
+                    <div id="container"></div>
+                </div>
+            </div>
+        </div>
+        
+    </body>
+    <script src="index_intro.js" type="module"></script>
+</html>
