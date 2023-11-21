@@ -101,7 +101,7 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                     let data = json ?? JSON.parse($('#stageData').val());        
                     let stagedata = null;
                     data.sort((a,b) => a.relativeTime - b.relativeTime);
-                    relativeTimeDiff = data[0].relativeTime;
+                    relativeTimeDiff = data[0]?.relativeTime ? data[0].relativeTime : data[0]?.action?.data?.timestamp;
                     slider.val(0);
                     currentIndex = 0;
                     let i = 0;
@@ -118,6 +118,8 @@ import TraintrackReplayLog from "./lib/components/replayLog.js";
                         stageHistory.push(stagedata);
                         if(element?.action?.relativeTime)
                             element.action.relativeTime -= relativeTimeDiff;
+                        else
+                            element.action.relativeTime = element.action?.data?.timestamp - relativeTimeDiff;
                         actions.push(element?.action);
                     });
                     if(loadDataProxy(0)){
